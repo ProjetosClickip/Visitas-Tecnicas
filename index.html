@@ -184,7 +184,7 @@ table.t tr.rec td:first-child{border-left:4px solid var(--orange)}
 <body>
 <div id="login" class="hidden"><div class="login-card"><img data-logo alt="I_MAIS Click IP"><h2>Visitas Técnicas</h2><p class="sub">Levantamento, dimensionamento e relatórios de campo</p><div id="loginBox"></div></div></div>
 <div id="app" class="hidden">
-  <header class="top"><div class="top-in"><img class="logo" data-logo alt="I_MAIS Click IP"><div class="spacer"></div><span id="net" class="net on">● Online</span>
+  <header class="top"><div class="top-in"><img class="logo" data-logo alt="I_MAIS Click IP"><div class="spacer"></div><span id="net" class="net on">● Online</span><span id="sync" class="net" style="background:#eef2f8;color:var(--navy)">☁</span>
     <div class="who"><div class="avatar" id="whoAv">?</div><span class="nm" id="whoName"></span></div><button class="btn sm" id="btnLogout">Sair</button></div></header>
   <nav class="tabs"><div class="tabs-in">
     <button data-tab="hist" class="on">🗂️ Histórico</button>
@@ -584,7 +584,7 @@ async function renderLogin() {
   }
 }
 async function startSession(u) {
-  u.lastLogin = new Date().toISOString(); await DB.put('users', u);
+  u.lastLogin = new Date().toISOString(); await DB.put('users', u, true);
   S.user = u; localStorage.setItem('cip_last', u.id);
   S.cfg = (await DB.get('settings', u.id)) || { userId: u.id, empresaPrestadora: 'A definir', responsavelObra: 'I_MAIS / CLICKIP SERVICOS DE COMUNICACAO LTDA', cnpj: '19.402.859/0001-55', setor: 'Engenharia / Projetos', ap: {} };
   S.visits = await DB.byUser(u.id);
@@ -1932,5 +1932,354 @@ ${body}
 </body></html>`;
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script>
+/* ================== SUPABASE – CONTA NA NUVEM E SINCRONIZAÇÃO ================== */
+/* 1) Cole aqui os dados do seu projeto (Supabase → Project Settings → API / API Keys).
+      Use a chave "anon public" ou "publishable". NUNCA use a service_role / secret. */
+const SUPABASE_URL = 'https://zegtrlzyfdydbsmymehi.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_NUE27dz_ucVw1Mslf44QSg_W8pAZ-k0';
+const BUCKET = 'visitas';
+
+function imgRefs(v) {
+  const r = [];
+  (v.photos || []).forEach(p => p && r.push({ o: p, k: 'data' }));
+  (v.diagramas || []).forEach(d => d && r.push({ o: d, k: 'data' }));
+  if (v.plan && (v.plan.img || v.plan.imgPath)) r.push({ o: v.plan, k: 'img' });
+  return r;
+}
+function dataURLtoBlob(d) {
+  const [h, b] = d.split(','); const mime = (h.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+  const bin = atob(b); const a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return new Blob([a], { type: mime });
+}
+function blobToDataURL(b) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); }); }
+function authErr(e) {
+  const m = String((e && e.message) || e || '');
+  if (/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail pelo link que enviamos antes de entrar.';
+  if (/already registered|already been registered/i.test(m)) return 'Este e-mail já tem conta. Use a aba Entrar.';
+  if (/Password should be at least/i.test(m)) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (/rate limit|too many/i.test(m)) return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
+  if (/Failed to fetch|NetworkError|network/i.test(m)) return 'Sem conexão com a internet.';
+  if (/valid email|invalid.*email/i.test(m)) return 'E-mail inválido.';
+  return m || 'Erro inesperado.';
+}
+
+const CLOUD = {
+  sb: null, uid: null, busy: false, t: null, lastSync: 0, started: false,
+  init() {
+    if (!window.supabase || /SEU-PROJETO/.test(SUPABASE_URL)) return;
+    this.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+    this.sb.auth.onAuthStateChange(ev => { if (ev === 'PASSWORD_RECOVERY') { loginMode = 'recover'; this.started = false; renderLogin(); } });
+  },
+  offlineSession() { // sessão guardada pelo Supabase neste aparelho (permite abrir sem internet)
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^sb-.*-auth-token$/.test(k)) { const s = JSON.parse(localStorage.getItem(k)); const u = s && (s.user || (s.currentSession && s.currentSession.user)); if (u && u.id) return { user: u }; } } } catch (e) { }
+    return null;
+  },
+  qKey() { return 'cip_q_' + this.uid; },
+  queue() { try { return Object.assign({ v: {}, d: {}, s: 0, p: 0 }, JSON.parse(localStorage.getItem(this.qKey()) || '{}')); } catch (e) { return { v: {}, d: {}, s: 0, p: 0 }; } },
+  setQ(q) { localStorage.setItem(this.qKey(), JSON.stringify(q)); },
+  pending() { const q = this.queue(); return Object.keys(q.v).length + Object.keys(q.d).length + (q.s ? 1 : 0) + (q.p ? 1 : 0); },
+  mark(kind, id) {
+    if (!this.uid) return; const q = this.queue(), tk = Date.now() + Math.random();
+    if (kind === 'v') { q.v[id] = tk; delete q.d[id]; } else if (kind === 'd') { q.d[id] = tk; delete q.v[id]; } else q[kind] = tk;
+    this.setQ(q); this.status(); this.schedule();
+  },
+  onLocal(store, val) { if (store === 'visits' && val && val.userId === this.uid) this.mark('v', val.id); else if (store === 'settings' && val && val.userId === this.uid) this.mark('s'); else if (store === 'users' && val && val.id === this.uid) this.mark('p'); },
+  onLocalDel(store, key) { if (store === 'visits') this.mark('d', key); },
+  schedule(ms = 2500) { clearTimeout(this.t); this.t = setTimeout(() => this.flush(), ms); },
+  status(txt) {
+    const el = $('#sync'); if (!el) return;
+    if (!txt) { const n = this.pending(); txt = !this.sb ? '⚠ Sem nuvem' : n ? `⟳ ${n} pendente(s)` : (this.lastSync ? '☁ Sincronizado' : '☁'); }
+    el.textContent = txt; const si = $('#syncInfo'); if (si) si.textContent = txt + (this.lastSync ? ' · última sincronização ' + new Date(this.lastSync).toLocaleTimeString('pt-BR') : '');
+  },
+  ownPath(v, p) { return p && p.startsWith(`${this.uid}/${v.id}/`); },
+
+  async pushVisit(v) {
+    const sb = this.sb, base = `${this.uid}/${v.id}/`;
+    for (const r of imgRefs(v)) {
+      const d = r.o[r.k], pk = r.k + 'Path';
+      if (this.ownPath(v, r.o[pk]) || typeof d !== 'string' || !d.startsWith('data:')) continue;
+      const path = base + uid() + '.jpg', blob = dataURLtoBlob(d);
+      const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, upsert: true });
+      if (error) throw error;
+      r.o[pk] = path;
+    }
+    const copy = JSON.parse(JSON.stringify(v)); delete copy._sync;
+    imgRefs(copy).forEach(r => { if (r.o[r.k + 'Path']) r.o[r.k] = null; });
+    const { error } = await sb.from('visits').upsert({ id: v.id, user_id: this.uid, type: v.type, status: v.status, cliente: visitTitle(v), data: copy, updated_at: v.updatedAt });
+    if (error) throw error;
+    v._sync = v.updatedAt; await DB.put('visits', JSON.parse(JSON.stringify(v)), true);
+    const keep = new Set(imgRefs(v).map(r => r.o[r.k + 'Path']).filter(Boolean));
+    const { data: files } = await sb.storage.from(BUCKET).list(this.uid + '/' + v.id, { limit: 1000 });
+    const rm = (files || []).map(f => base + f.name).filter(p => !keep.has(p));
+    if (rm.length) await sb.storage.from(BUCKET).remove(rm);
+  },
+  async rmFolder(id) {
+    const dir = this.uid + '/' + id; const { data: files } = await this.sb.storage.from(BUCKET).list(dir, { limit: 1000 });
+    if (files && files.length) await this.sb.storage.from(BUCKET).remove(files.map(f => dir + '/' + f.name));
+  },
+
+  async flush() {
+    if (!this.sb || !this.uid || !S.user || this.busy) return;
+    if (!navigator.onLine) return this.status();
+    this.busy = true; this.status('⟳ Sincronizando…'); let err = null;
+    try {
+      const sb = this.sb; let q = this.queue();
+      if (q.p) { const tk = q.p, u = S.user; const { error } = await sb.from('profiles').upsert({ id: this.uid, name: u.name, role: u.role || '', email: u.email || '', updated_at: new Date().toISOString() }); if (error) throw error; q = this.queue(); if (q.p === tk) { q.p = 0; this.setQ(q); } }
+      q = this.queue();
+      if (q.s && S.cfg) { const tk = q.s; const { error } = await sb.from('settings').upsert({ user_id: this.uid, data: S.cfg, updated_at: new Date().toISOString() }); if (error) throw error; q = this.queue(); if (q.s === tk) { q.s = 0; this.setQ(q); } }
+      for (const [id, tk] of Object.entries(this.queue().d)) {
+        const { error } = await sb.from('visits').delete().eq('id', id); if (error) throw error;
+        await this.rmFolder(id); q = this.queue(); if (q.d[id] === tk) { delete q.d[id]; this.setQ(q); }
+      }
+      for (const [id, tk] of Object.entries(this.queue().v)) {
+        const v = S.visits.find(x => x.id === id); if (v) await this.pushVisit(v);
+        q = this.queue(); if (q.v[id] === tk) { delete q.v[id]; this.setQ(q); }
+      }
+      this.lastSync = Date.now();
+    } catch (e) { err = e; console.error('Sincronização:', e); }
+    this.busy = false;
+    if (err) {
+      if (/JWT|token|401|not authenticated/i.test(String(err.message || err))) { toast('Sua sessão expirou. Entre novamente para sincronizar.', 5000); }
+      this.status('⚠ Erro ao sincronizar'); this.schedule(30000);
+    } else { this.status(); if (this.pending()) this.schedule(1000); }
+  },
+
+  async pull() {
+    const sb = this.sb, uidv = this.uid; let q = this.queue();
+    const { data: pr, error: e1 } = await sb.from('profiles').select('*').eq('id', uidv).maybeSingle(); if (e1) throw e1;
+    if (pr && !q.p) { S.user.name = pr.name || S.user.name; S.user.role = pr.role || ''; await DB.put('users', S.user, true); $('#whoName').textContent = S.user.name; $('#whoAv').textContent = initials(S.user.name); }
+    else if (!pr) this.mark('p');
+    const { data: st, error: e2 } = await sb.from('settings').select('data').eq('user_id', uidv).maybeSingle(); if (e2) throw e2;
+    q = this.queue();
+    if (st && st.data && !q.s) { S.cfg = Object.assign({}, st.data, { userId: uidv }); await DB.put('settings', S.cfg, true); }
+    else if (!st) this.mark('s');
+    const { data: rows, error } = await sb.from('visits').select('id,data,updated_at'); if (error) throw error;
+    q = this.queue(); const remote = new Set();
+    for (const r of rows || []) {
+      remote.add(r.id); if (q.v[r.id] || q.d[r.id] || !r.data) continue;
+      const rv = r.data; rv.updatedAt = rv.updatedAt || r.updated_at; rv.userId = uidv;
+      const local = S.visits.find(v => v.id === r.id);
+      if (local) {
+        if (S.cur && S.cur.id === local.id) continue;
+        if ((local.updatedAt || '') >= rv.updatedAt) { if (!local._sync) this.mark('v', local.id); continue; }
+        const m = new Map(imgRefs(local).filter(x => x.o[x.k + 'Path'] && x.o[x.k]).map(x => [x.o[x.k + 'Path'], x.o[x.k]]));
+        imgRefs(rv).forEach(x => { const p = x.o[x.k + 'Path']; if (p && m.has(p)) x.o[x.k] = m.get(p); });
+      }
+      rv._sync = rv.updatedAt;
+      if (local) { Object.keys(local).forEach(k => delete local[k]); Object.assign(local, rv); } else S.visits.push(rv);
+      await DB.put('visits', JSON.parse(JSON.stringify(rv)), true);
+    }
+    for (const v of [...S.visits]) {
+      if (remote.has(v.id) || q.v[v.id]) continue;
+      if (v._sync) { if (S.cur && S.cur.id === v.id) continue; S.visits = S.visits.filter(x => x !== v); await DB.del('visits', v.id, true); }
+      else this.mark('v', v.id);
+    }
+  },
+  async sync(force) {
+    if (!this.sb || !this.uid || !navigator.onLine) return this.status();
+    if (!force && Date.now() - this.lastPull < 30000) return this.flush();
+    this.lastPull = Date.now();
+    try { this.status('⟳ Sincronizando…'); await this.pull(); }
+    catch (e) { console.error(e); this.status('⚠ Erro ao sincronizar'); return; }
+    await this.flush();
+    if (S.user && !S.cur && S.tab !== 'cfg') go(S.tab);
+  },
+  lastPull: 0,
+
+  needs(v) { return !!v && imgRefs(v).some(r => r.o[r.k + 'Path'] && !r.o[r.k]); },
+  async hydrate(v) {
+    if (!this.needs(v)) return true;
+    if (!this.sb || !navigator.onLine) { toast('Sem internet: as imagens desta visita ainda não foram baixadas neste aparelho.', 4500); return false; }
+    toast('Baixando imagens da visita…', 15000); let ok = true;
+    await Promise.all(imgRefs(v).filter(r => r.o[r.k + 'Path'] && !r.o[r.k]).map(async r => {
+      const { data, error } = await this.sb.storage.from(BUCKET).download(r.o[r.k + 'Path']);
+      if (error || !data) { ok = false; return; } r.o[r.k] = await blobToDataURL(data);
+    }));
+    await DB.put('visits', JSON.parse(JSON.stringify(v)), true);
+    const img = v.plan && planImage(v.plan);
+    if (img && !img.complete) await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 5000); });
+    toast(ok ? 'Imagens carregadas' : 'Algumas imagens não puderam ser baixadas', 2000);
+    return ok;
+  }
+};
+
+/* ---- intercepta o banco local: toda gravação também entra na fila de sincronização ---- */
+(() => {
+  const put = DB.put.bind(DB), del = DB.del.bind(DB);
+  DB.put = (store, val, quiet) => put(store, val).then(r => { if (!quiet) CLOUD.onLocal(store, val); return r; });
+  DB.del = (store, key, quiet) => del(store, key).then(r => { if (!quiet) CLOUD.onLocalDel(store, key); return r; });
+})();
+
+/* ---- tela de login com conta Supabase (e-mail + senha) ---- */
+renderLogin = async function () {
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
+  const box = $('#loginBox');
+  if (!DB.db && !DB.mem) await DB.open();
+  if (!CLOUD.started && loginMode !== 'recover') {
+    let session = null;
+    if (CLOUD.sb) { try { const { data } = await CLOUD.sb.auth.getSession(); session = data && data.session; } catch (e) { } }
+    if (!session && !navigator.onLine) session = CLOUD.offlineSession();
+    if (session) return cloudStart(session);
+  }
+  if (!CLOUD.sb) {
+    box.innerHTML = `<p style="text-align:center">${/SEU-PROJETO/.test(SUPABASE_URL) ? 'O endereço e a chave do Supabase ainda não foram configurados neste arquivo (início do bloco SUPABASE).' : 'Não foi possível conectar ao servidor. Verifique a internet e recarregue a página.'}</p><button class="btn primary block" onclick="location.reload()">Recarregar</button>`;
+    return;
+  }
+  const base = location.origin + location.pathname;
+  const tabs = `<div class="login-tabs"><button data-m="in" class="${loginMode === 'in' ? 'on' : ''}">Entrar</button><button data-m="new" class="${loginMode === 'new' ? 'on' : ''}">Criar conta</button></div>`;
+  if (loginMode === 'new') box.innerHTML = tabs + `
+      <div class="grid">
+        <label class="f">Nome completo<input type="text" id="nwName" autocomplete="name"></label>
+        <label class="f">Cargo / setor<input type="text" id="nwRole" placeholder="Engenharia / Projetos"></label>
+        <label class="f">E-mail<input type="email" id="nwEmail" autocomplete="email"></label>
+        <label class="f">Crie uma senha<input type="password" id="nwPin" autocomplete="new-password" placeholder="mínimo 6 caracteres"></label>
+      </div>
+      <button class="btn primary block" id="nwGo" style="margin-top:14px">Criar conta</button>`;
+  else if (loginMode === 'reset') box.innerHTML = `
+      <h3 style="margin-top:0">Recuperar senha</h3>
+      <label class="f">E-mail da conta<input type="email" id="rsEmail" autocomplete="email"></label>
+      <button class="btn primary block" id="rsGo" style="margin-top:14px">Enviar link de recuperação</button>
+      <p style="text-align:center"><a href="#" data-m="in">Voltar para o login</a></p>`;
+  else if (loginMode === 'recover') box.innerHTML = `
+      <h3 style="margin-top:0">Defina uma nova senha</h3>
+      <label class="f">Nova senha<input type="password" id="rcPin" autocomplete="new-password" placeholder="mínimo 6 caracteres"></label>
+      <button class="btn primary block" id="rcGo" style="margin-top:14px">Salvar senha e entrar</button>`;
+  else box.innerHTML = tabs + `
+      <label class="f">E-mail<input type="email" id="lgEmail" autocomplete="email"></label>
+      <label class="f" style="margin-top:10px">Senha<input type="password" id="lgPin" autocomplete="current-password"></label>
+      <button class="btn primary block" id="lgGo" style="margin-top:14px">Entrar</button>
+      <p style="text-align:center;margin-bottom:0"><a href="#" data-m="reset">Esqueci minha senha</a></p>`;
+  box.insertAdjacentHTML('beforeend', `<p class="small muted" style="margin-top:14px;text-align:center">Suas visitas ficam salvas na sua conta e aparecem em qualquer aparelho em que você entrar. Sem internet, o app continua funcionando e sincroniza depois.</p>`);
+  $$('[data-m]', box).forEach(b => b.onclick = e => { e.preventDefault(); loginMode = b.dataset.m; renderLogin(); });
+  const busy = (b, on) => { b.disabled = on; b.style.opacity = on ? .6 : 1; };
+  const sb = CLOUD.sb;
+  if (loginMode === 'in') {
+    const go = async () => {
+      const b = $('#lgGo'); busy(b, true);
+      const { data, error } = await sb.auth.signInWithPassword({ email: $('#lgEmail').value.trim(), password: $('#lgPin').value });
+      busy(b, false); if (error) return toast(authErr(error), 4500); cloudStart(data.session);
+    };
+    $('#lgGo').onclick = go; $('#lgPin').onkeydown = e => { if (e.key === 'Enter') go(); };
+    setTimeout(() => $('#lgEmail') && $('#lgEmail').focus(), 50);
+  } else if (loginMode === 'new') {
+    $('#nwGo').onclick = async () => {
+      const name = $('#nwName').value.trim(), email = $('#nwEmail').value.trim(), pass = $('#nwPin').value;
+      if (!name) return toast('Informe o nome'); if (!email) return toast('Informe o e-mail'); if (pass.length < 6) return toast('Senha com no mínimo 6 caracteres');
+      const b = $('#nwGo'); busy(b, true);
+      const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { name, role: $('#nwRole').value.trim() }, emailRedirectTo: base } });
+      busy(b, false); if (error) return toast(authErr(error), 4500);
+      if (data.session) return cloudStart(data.session);
+      box.innerHTML = `<h3 style="margin-top:0">Confirme seu e-mail</h3><p>Enviamos um link de confirmação para <b>${esc(email)}</b>. Abra o e-mail, clique no link e depois entre com sua senha.</p><button class="btn primary block" data-m="in">Ir para o login</button>`;
+      $$('[data-m]', box).forEach(x => x.onclick = () => { loginMode = 'in'; renderLogin(); });
+    };
+  } else if (loginMode === 'reset') {
+    $('#rsGo').onclick = async () => {
+      const email = $('#rsEmail').value.trim(); if (!email) return toast('Informe o e-mail');
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: base });
+      if (error) return toast(authErr(error), 4500);
+      toast('Se o e-mail tiver conta, você receberá um link para criar uma nova senha.', 5000); loginMode = 'in'; renderLogin();
+    };
+  } else if (loginMode === 'recover') {
+    $('#rcGo').onclick = async () => {
+      const p = $('#rcPin').value; if (p.length < 6) return toast('Senha com no mínimo 6 caracteres');
+      const { error } = await sb.auth.updateUser({ password: p }); if (error) return toast(authErr(error), 4500);
+      toast('Senha atualizada'); loginMode = 'in'; const { data } = await sb.auth.getSession(); if (data.session) cloudStart(data.session); else renderLogin();
+    };
+  }
+};
+
+async function cloudStart(session) {
+  if (CLOUD.started) return; CLOUD.started = true;
+  const au = session.user, meta = au.user_metadata || {}; CLOUD.uid = au.id;
+  const saved = await DB.get('users', au.id);
+  const u = Object.assign({ id: au.id, name: meta.name || (au.email || '').split('@')[0], role: meta.role || '', createdAt: au.created_at }, saved || {}, { email: au.email });
+  await startSession(u);
+  await migrateLegacy(u);
+  CLOUD.status(); CLOUD.sync(true);
+}
+
+/* perfis antigos (salvos só neste aparelho, com PIN): oferece enviar as visitas para a conta */
+async function migrateLegacy(u) {
+  const all = await DB.all('visits'), users = await DB.all('users');
+  const groups = {}; all.filter(v => /^u_/.test(v.userId || '')).forEach(v => (groups[v.userId] = groups[v.userId] || []).push(v));
+  for (const [old, list] of Object.entries(groups)) {
+    if (localStorage.getItem('cip_legacy_skip_' + old)) continue;
+    const nm = (users.find(x => x.id === old) || {}).name || 'perfil antigo';
+    if (!(await confirmBox(`Encontramos ${list.length} visita(s) salvas neste aparelho no perfil local "${nm}" (versão antiga do app). Deseja enviar essas visitas para a sua conta ${u.email}?`))) { localStorage.setItem('cip_legacy_skip_' + old, '1'); continue; }
+    for (const v of list) { v.userId = u.id; delete v._sync; S.visits.push(v); await DB.put('visits', v); }
+    const os = await DB.get('settings', old); if (os) { S.cfg = Object.assign({}, os, { userId: u.id }); await DB.put('settings', S.cfg); await DB.del('settings', old, true); }
+    await DB.del('users', old, true); toast(list.length + ' visita(s) enviadas para sua conta');
+  }
+  if (!S.cur && S.tab !== 'cfg') go(S.tab);
+}
+
+logout = async function () {
+  await saveNow();
+  if (CLOUD.pending() && !(await confirmBox(navigator.onLine ? 'Há alterações sendo enviadas para a nuvem. Sair mesmo assim? (elas serão enviadas no próximo login neste aparelho)' : 'Você está sem internet e há alterações ainda não enviadas. Elas só serão enviadas quando você entrar de novo neste aparelho. Sair mesmo assim?'))) return;
+  if (navigator.onLine) await CLOUD.flush();
+  if (CLOUD.sb) { try { await CLOUD.sb.auth.signOut({ scope: 'local' }); } catch (e) { } }
+  clearTimeout(CLOUD.t); CLOUD.uid = null; CLOUD.started = false; CLOUD.lastSync = 0; CLOUD.lastPull = 0;
+  S.user = null; S.cur = null; S.visits = []; loginMode = 'in'; renderLogin();
+};
+
+/* ---- garante as imagens baixadas antes de abrir, gerar PDF/KMZ ou duplicar ---- */
+(() => {
+  const _go = go, _rep = openReport, _kmz = exportKMZ;
+  go = function (tab, visit) { if (visit && CLOUD.needs(visit)) { CLOUD.hydrate(visit).then(() => _go(tab, visit)); return; } return _go(tab, visit); };
+  openReport = function (v) { if (CLOUD.needs(v)) { CLOUD.hydrate(v).then(() => _rep(v)); return; } return _rep(v); };
+  exportKMZ = function (v) { if (CLOUD.needs(v)) { CLOUD.hydrate(v).then(() => _kmz(v)); return; } return _kmz(v); };
+})();
+duplicateVisit = async function (id) {
+  const o = S.visits.find(v => v.id === id); if (!o) return; await CLOUD.hydrate(o);
+  const v = JSON.parse(JSON.stringify(o)); v.id = 'v_' + uid(); delete v._sync; v.cli.nome = (v.cli.nome || '') + ' (cópia)'; v.status = 'draft'; v.createdAt = v.updatedAt = new Date().toISOString();
+  await DB.put('visits', v); S.visits.push(v); toast('Visita duplicada'); go(S.tab);
+};
+
+/* ---- ajustes na tela de configurações ---- */
+(() => {
+  const _rs = renderSettings;
+  renderSettings = function () {
+    _rs();
+    const em = $('#pfEmail'); if (em) { em.readOnly = true; em.title = 'E-mail da conta (usado no login)'; }
+    const pin = $('#pfPin');
+    if (pin) {
+      pin.parentElement.firstChild.textContent = 'Nova senha (opcional)'; pin.placeholder = 'mínimo 6 caracteres';
+      pin.onchange = async () => {
+        if (!pin.value) return; if (pin.value.length < 6) return toast('Senha com no mínimo 6 caracteres');
+        if (!CLOUD.sb || !navigator.onLine) return toast('É preciso estar com internet para trocar a senha');
+        const { error } = await CLOUD.sb.auth.updateUser({ password: pin.value }); pin.value = '';
+        toast(error ? authErr(error) : 'Senha alterada', 3500);
+      };
+    }
+    const exp = $('#bkExp'); if (!exp) return;
+    const p = exp.closest('.card-b').querySelector('p');
+    p.innerHTML = `Visitas de <b>${esc(S.user.name)}</b>: ${S.visits.length}. Os dados ficam salvos na sua conta (${esc(S.user.email || '')}) e aparecem em qualquer aparelho em que você entrar. Uma cópia fica neste aparelho para funcionar sem internet; ao reconectar, tudo é sincronizado.<br><span id="syncInfo" class="small muted"></span>`;
+    exp.insertAdjacentHTML('beforebegin', '<button class="btn teal" id="syncNow">Sincronizar agora</button>');
+    $('#syncNow').onclick = () => { if (!navigator.onLine) return toast('Sem internet'); CLOUD.sync(true); };
+    exp.onclick = async () => {
+      for (const v of S.visits) await CLOUD.hydrate(v);
+      download(`backup_visitas_${safeName(S.user.name)}_${today()}.json`, JSON.stringify({ app: 'clickip-visitas', v: 1, user: { name: S.user.name, role: S.user.role, email: S.user.email }, settings: S.cfg, visits: S.visits }), 'application/json');
+    };
+    const del = $('#usrDel');
+    del.textContent = 'Excluir todas as minhas visitas';
+    del.onclick = async () => {
+      if (!(await confirmBox('Excluir TODAS as suas visitas, fotos e diagramas da nuvem e de todos os aparelhos? Não dá para desfazer.'))) return;
+      for (const v of [...S.visits]) await DB.del('visits', v.id);
+      S.visits = []; S.cur = null; toast('Visitas excluídas'); renderSettings();
+    };
+    CLOUD.status();
+  };
+})();
+
+CLOUD.init();
+if (/type=recovery/.test(location.hash)) loginMode = 'recover';
+window.addEventListener('online', () => CLOUD.sync());
+window.addEventListener('offline', () => CLOUD.status());
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.user) CLOUD.sync(); });
+</script>
+
 </body>
 </html>
