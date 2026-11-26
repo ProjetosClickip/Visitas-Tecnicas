@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mensuração de Custos de Projetos</title>
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<!-- Mensuração de Custos – subsistema da Plataforma de Projetos.
+     Usa a mesma sessão (login) do portal e grava os dados no servidor. -->
+<script type="module" src="/src/custos/main.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logos"><img class="i" data-logo="imais" alt="i_mais"><img class="c" data-logo="click" alt="ClickIP"></div>
+      <div class="t1">Mensuração de Custos</div>
+      <div class="t2">Projetos de Infraestrutura e Telecom</div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="btn icon menu-btn" data-action="menu-toggle" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <div class="proj">
+        <label for="projSel">Projeto ativo</label>
+        <select class="inp" id="projSel"></select>
+      </div>
+      <span class="save-st" id="saveSt"></span><span class="sync-st" id="syncSt"></span>
+      <button class="btn pdf" data-action="report" title="Baixar relatório em PDF ou Excel"><span data-icon="pdf"></span>GERAR RELATÓRIO (PDF / EXCEL)</button>
+      <button class="btn icon" id="themeBtn" data-action="theme" title="Alternar modo noturno"></button>
+      <button class="btn user-chip" data-action="profile" title="Meu perfil"><span class="avatar" id="uAv"></span><span class="un" id="uName"></span></button>
+      <button class="btn icon" data-action="logout" title="Sair"><span data-icon="logout"></span></button>
+    </header>
+    <main class="content" id="view"></main>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+<div id="modalRoot"></div>
+</body>
+</html>
