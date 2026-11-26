@@ -1,0 +1,8 @@
+{
+  "fonte": "Exemplo – substitua por data/catalogo-inicial.json com a tabela real",
+  "itens": [
+    { "codigo": "1", "descricao": "ABRACADEIRA BAP 3 (EXEMPLO)", "unidade": "Unidade", "valor": 1.0, "tabela": "01" },
+    { "codigo": "2", "descricao": "CABO OPTICO 12FO (EXEMPLO)", "unidade": "Metro", "valor": 1.0, "tabela": "01" },
+    { "codigo": "3", "descricao": "CTO 1:8 (EXEMPLO)", "unidade": "Unidade", "valor": 1.0, "tabela": "01" }
+  ]
+}

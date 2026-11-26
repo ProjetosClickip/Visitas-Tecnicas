@@ -1,0 +1,34 @@
+{
+  "nome": "Nome do grupo",
+  "unidade": "Unidade · Engenharia / Projetos",
+  "cidade": "Cidade/UF",
+  "setor": "Engenharia / Projetos",
+  "empresaResponsavel": {
+    "nome": "RAZÃO SOCIAL DA EMPRESA RESPONSÁVEL",
+    "cnpj": "00.000.000/0001-00"
+  },
+  "empresasGrupo": [
+    {
+      "id": "empresa1",
+      "nome": "EMPRESA 1 LTDA",
+      "cnpj": "00.000.000/0001-00",
+      "tabelaCatalogo": "01",
+      "nomeCurto": "Empresa 1"
+    },
+    {
+      "id": "empresa2",
+      "nome": "EMPRESA 2 LTDA",
+      "cnpj": "11.111.111/0001-11",
+      "tabelaCatalogo": "02",
+      "nomeCurto": "Empresa 2"
+    }
+  ],
+  "dominiosEmailPermitidos": [
+    "suaempresa.com.br"
+  ],
+  "painelPublico": true,
+  "revisoresPadrao": [
+    "Nome do Diretor - Diretor",
+    "Nome da Supervisora - Supervisora de projetos"
+  ]
+}
