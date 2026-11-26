@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------
+# Segredos, logins e dados da empresa: NUNCA versionar
+# ---------------------------------------------------------------
+# Variáveis de ambiente (senhas iniciais, segredos, porta, etc.)
+.env
+.env.*
+!.env.example
+
+# Configuração da organização (e-mails, CNPJs, empresas do grupo)
+config/*.json
+!config/*.example.json
+
+# Banco de dados, catálogo de preços, backups e uploads
+data/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+backup*.json
+base_visitas*.json
+
+# Arquivo HTML original (contém catálogo de preços e e-mails embutidos)
+legado/
+*.legacy.html
+
+# ---------------------------------------------------------------
+# Build e dependências
+# ---------------------------------------------------------------
+node_modules/
+web/dist/
+coverage/
+test-results/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Arquivos do OCR copiados de node_modules (npm run preparar:ocr)
+web/public/vendor/
+
+# Pacotes de entrega
+*.zip

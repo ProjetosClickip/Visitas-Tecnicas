@@ -1,0 +1,41 @@
+{
+  "name": "clickip-plataforma",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Plataforma de Projetos Click IP – Visitas Técnicas e Mensuração de Custos",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "preparar:ocr": "node scripts/copiar-ocr.js",
+    "predev": "node scripts/copiar-ocr.js",
+    "prebuild": "node scripts/copiar-ocr.js",
+    "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node --disable-warning=ExperimentalWarning --watch server/index.js",
+    "dev:web": "vite --config web/vite.config.js",
+    "build": "vite build --config web/vite.config.js",
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js",
+    "usuario:criar": "node --disable-warning=ExperimentalWarning scripts/criar-usuario.js",
+    "usuarios:semear": "node --disable-warning=ExperimentalWarning scripts/semear-usuarios.js",
+    "importar:legado": "node --disable-warning=ExperimentalWarning scripts/importar-legado.js",
+    "test:e2e": "node --disable-warning=ExperimentalWarning test/e2e/fumaca.mjs",
+    "backup": "node --disable-warning=ExperimentalWarning scripts/backup.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/por": "^1.0.0",
+    "chart.js": "^4.6.2",
+    "concurrently": "^10.0.7",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
+    "pdfjs-dist": "^6.5.438",
+    "tesseract.js": "^7.0.0",
+    "vite": "^8.4.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}
