@@ -1,0 +1,12 @@
+name: Manter Supabase ativo
+on:
+  schedule:
+    - cron: '0 12 * * 1,4'   # segundas e quintas, 9h de Brasília
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -fsS "https://ueqvmhhkfoebwvietzvx.supabase.co/auth/v1/health" \
+            -H "apikey: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}"
