@@ -36,7 +36,7 @@ function bindPerfilMidia(after) {
 function segurancaHTML() {
   return `<div class="span3"><div style="font-size:13px;font-weight:600;color:var(--navy-2);margin-bottom:6px">Senha</div>
     <div class="grid g3"><label class="f">Senha atual<input type="password" id="pfSenhaAtual" autocomplete="current-password"></label>
-    <label class="f">Nova senha<input type="password" id="pfSenhaNova" autocomplete="new-password" placeholder="mín. 8 caracteres, letras e números"></label>
+    <label class="f">Nova senha<input type="password" id="pfSenhaNova" autocomplete="new-password" placeholder="mín. 8, com maiúscula, minúscula, número e símbolo"></label>
     <label class="f">Confirme a nova senha<input type="password" id="pfSenhaNova2" autocomplete="new-password"></label></div>
     <button class="btn sm" id="pfSenhaSalvar" style="margin-top:8px">Trocar senha</button>
     <p class="small muted" style="margin:6px 0 0">Esqueceu a senha? Um supervisor pode gerar uma senha provisória em Ambiente da supervisão → Equipe.</p></div>`;

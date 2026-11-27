@@ -81,7 +81,9 @@ async function confirmarSenha(senha, mensagemErro) {
 function validarSenhaNova(s, email = '', nome = '') {
   s = String(s || '');
   if (s.length < 8) return 'A senha precisa ter no mínimo 8 caracteres.';
-  if (!/[a-zA-Z]/.test(s) || !/\d/.test(s)) return 'Use letras e números na senha.';
+  if (!/[a-z]/.test(s) || !/[A-Z]/.test(s) || !/\d/.test(s) || !/[^a-zA-Z0-9]/.test(s)) {
+    return 'Use letras minúsculas, maiúsculas, números e um caractere especial na senha.';
+  }
   const local = String(email).split('@')[0].toLowerCase();
   if ((local && s.toLowerCase().includes(local)) || (nome && s.toLowerCase() === String(nome).toLowerCase().replace(/\s+/g, ''))) {
     return 'A senha não pode conter o seu e-mail ou nome.';

@@ -52,7 +52,7 @@ function renderLogin(el, ctx) {
 function renderTrocarSenha(el) {
   el = el || (ENV === 'sup' ? $('#supMain') : $('#colLogin'));
   if (ENV === 'col') { $('#app').classList.add('hidden'); el.classList.remove('hidden'); }
-  el.innerHTML = `<div class="split-card"><div class="split-l"><span class="kicker">PRIMEIRO ACESSO</span><h2>Defina a sua senha</h2><p>Olá, ${esc(S.user ? S.user.name : '')}! Você entrou com uma senha provisória. Crie agora uma senha pessoal para continuar.</p><ul class="feat"><li>🔒 Mínimo de 8 caracteres, com letras e números</li><li>🙈 Não use o seu nome ou e-mail</li><li>👤 A senha é pessoal: não compartilhe</li></ul></div><div class="split-r">
+  el.innerHTML = `<div class="split-card"><div class="split-l"><span class="kicker">PRIMEIRO ACESSO</span><h2>Defina a sua senha</h2><p>Olá, ${esc(S.user ? S.user.name : '')}! Você entrou com uma senha provisória. Crie agora uma senha pessoal para continuar.</p><ul class="feat"><li>🔒 Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial</li><li>🙈 Não use o seu nome ou e-mail</li><li>👤 A senha é pessoal: não compartilhe</li></ul></div><div class="split-r">
     <form id="tsForm">
       <label class="f">Senha provisória (atual)<input type="password" id="tsAtual" autocomplete="current-password" required></label>
       <label class="f" style="margin-top:8px">Nova senha<input type="password" id="tsNova" autocomplete="new-password" required></label>

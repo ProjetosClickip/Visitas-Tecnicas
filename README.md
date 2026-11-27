@@ -62,7 +62,7 @@ vercel.json                publicação na Vercel + cabeçalhos de segurança
    A partir daí, as migrações de `supabase/migrations` e a função `admin-usuarios` são aplicadas sozinhas a cada push na `main`.
 3. Em **Authentication → Sign In / Providers**:
    - desligue **Allow new users to sign up**, porque as contas são criadas só pela supervisão;
-   - em **Email**, exija senha com **mínimo de 8 caracteres** e **letras e números**.
+   - em **Email**, exija senha com **mínimo de 8 caracteres** e **minúsculas, maiúsculas, números e símbolos**.
 4. Em **Authentication → URL Configuration**, coloque em **Site URL** o endereço do site (ex.: o da Vercel).
 5. Carregue os dados privados. No seu computador, com `config/organizacao.json` e `data/catalogo-inicial.json` preenchidos, gere os arquivos SQL:
 

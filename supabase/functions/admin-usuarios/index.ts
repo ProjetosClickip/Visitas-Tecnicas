@@ -20,13 +20,15 @@ const resposta = (status: number, corpo: unknown) =>
   new Response(JSON.stringify(corpo), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 const erro = (status: number, mensagem: string) => resposta(status, { erro: mensagem });
 
-/** Senha provisória legível (sem caracteres ambíguos): 12 caracteres com letras e números. */
+/** Senha provisória legível (sem caracteres ambíguos): 12 caracteres com minúscula, maiúscula, número e símbolo. */
 function senhaProvisoria(): string {
-  const letras = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
+  const minus = 'abcdefghjkmnpqrstuvwxyz';
+  const maius = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const digitos = '23456789';
-  const todos = letras + digitos;
+  const simbolos = '!@#$%&*?';
+  const todos = minus + maius + digitos + simbolos;
   const aleatorio = (n: number) => crypto.getRandomValues(new Uint32Array(1))[0] % n;
-  const c = [letras[aleatorio(letras.length)], digitos[aleatorio(digitos.length)]];
+  const c = [minus, maius, digitos, simbolos].map((g) => g[aleatorio(g.length)]);
   while (c.length < 12) c.push(todos[aleatorio(todos.length)]);
   for (let i = c.length - 1; i > 0; i--) { const j = aleatorio(i + 1); [c[i], c[j]] = [c[j], c[i]]; }
   return c.join('');

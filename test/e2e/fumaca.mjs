@@ -20,7 +20,7 @@ try { ({ chromium } = await import('playwright')); } catch {
 }
 const SUP = { email: process.env.E2E_SUP_EMAIL, senha: process.env.E2E_SUP_SENHA };
 const COLAB_EMAIL = process.env.E2E_COLAB_EMAIL;
-const COLAB_SENHA_NOVA = process.env.E2E_COLAB_SENHA || 'Colab' + Math.random().toString(36).slice(2, 10) + '7';
+const COLAB_SENHA_NOVA = process.env.E2E_COLAB_SENHA || 'Colab' + Math.random().toString(36).slice(2, 10) + '7!';
 if (!SUP.email || !SUP.senha || !COLAB_EMAIL) { console.error('Defina E2E_SUP_EMAIL, E2E_SUP_SENHA e E2E_COLAB_EMAIL.'); process.exit(1); }
 
 const site = await servir();
