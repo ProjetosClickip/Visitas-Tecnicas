@@ -132,3 +132,5 @@ Mudanças no banco entram como uma nova migração em `supabase/migrations/` (ar
 - **Fotos das visitas:** continuam dentro do registro da visita. Se o volume crescer, o próximo passo é movê-las para o Supabase Storage.
 - **Plano grátis do Supabase:** o projeto é pausado após 7 dias sem nenhum acesso (os dados não se perdem; é só reativar no painel).
 - **Login com Google Workspace:** ainda não implementado. O Supabase Auth suporta, e dá para ligar depois.
+
+  
