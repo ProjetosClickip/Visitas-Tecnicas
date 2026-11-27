@@ -2,7 +2,7 @@
  * O servidor só devolve nome da demanda, responsável, tipo, status e data (nenhum valor ou contato).
  */
 import { api, msgErro } from '../../shared/api.js';
-import { avatarHTML, normResp, stPill } from '../ambientes.js';
+import { ENV, avatarHTML, normResp, stPill } from '../ambientes.js';
 import { S } from '../estado.js';
 import { dashBlocos } from './graficos.js';
 import { KIND } from '../plataforma.js';
@@ -18,7 +18,7 @@ async function dadosPublico() {
 async function renderPublico() {
   const el = $('#pubMain');
   let D;
-  try { D = await dadosPublico(); }
+  try { D = await dadosPublico(); if (ENV !== 'pub') return; }
   catch (e) {
     el.innerHTML = `<section class="hero"><div class="hero-t"><span class="kicker">GRUPO CLICK IP · ENGENHARIA / PROJETOS</span><h1>Plataforma de Projetos</h1><p>${e.status === 404 ? 'O painel público está desativado. Entre no Ambiente do colaborador para ver as suas demandas.' : esc(msgErro(e))}</p></div></section>`;
     return;

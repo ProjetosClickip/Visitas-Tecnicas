@@ -1,175 +1,134 @@
 # Plataforma de Projetos Click IP
 
 Visitas Técnicas e Mensuração de Custos do time de Engenharia / Projetos.
-Esta versão substitui o arquivo HTML único (dados no navegador de cada pessoa) por um **servidor
-central** com login, permissões e banco de dados. A interface é a mesma, agora dividida em módulos.
 
-## O que mudou
+- **Banco de dados e login:** Supabase (Postgres + Supabase Auth).
+- **Site:** estático (HTML/CSS/JS gerado pelo Vite), publicado na Vercel ou em qualquer hospedagem estática.
+- **Sem servidor próprio para manter.**
 
-| Antes (arquivo único) | Agora |
+## Como a segurança funciona
+
+- **Tabelas fechadas.** As tabelas não podem ser lidas nem gravadas diretamente pelo site. Tudo passa por **funções no banco** (`supabase/migrations`), que conferem quem está logado e o que essa pessoa pode fazer.
+- **Fluxo de aprovação no banco.** Aprovar, devolver, assinar, o histórico de alterações, o "Concluído" e os totais dos orçamentos são decididos e gravados pelo banco. O navegador não consegue forjar nada disso.
+- **Papéis guardados no banco.** Colaborador ou supervisão fica no banco. Contas são criadas só pela supervisão, pela função `admin-usuarios`, que usa a chave de serviço do lado do Supabase e nunca no site.
+- **Senha provisória.** Toda conta nova começa com senha provisória, e a troca é obrigatória no primeiro acesso. A assinatura eletrônica exige digitar a senha na hora.
+- **Controle de versão.** Se duas pessoas editam a mesma visita ou orçamento, quem salvar por último é avisado e escolhe qual versão fica.
+- **Política de segurança (CSP).** O site roda sem script inline (`vercel.json`), e todas as bibliotecas (Excel, PDF, OCR, gráficos) são servidas pelo próprio site, sem CDN.
+- **Testes de segurança.** O arquivo `supabase/testes/seguranca.sql` testa as regras simulando colaborador, supervisão e visitante. Ele roda sem deixar dados no banco.
+
+## O que fica fora do git
+
+O repositório é público, então nada sensível entra nele:
+
+| Arquivo | O que tem |
 |---|---|
-| Dados no navegador de cada computador (IndexedDB/localStorage); a supervisão só via o que estava no próprio navegador | Banco central (SQLite) no servidor; todos veem os mesmos dados, de qualquer computador |
-| "Supervisão" = quem digitasse um dos 4 e-mails fixos no código ao criar a conta | Papel guardado no servidor; contas criadas só pela supervisão ou por script |
-| Senha do portal com hash simples de 53 bits e salt fixo; PIN de 4 caracteres; pergunta de segurança | scrypt com salt por usuário; mínimo de 8 caracteres com letras e números; senha provisória obrigatória no 1º acesso; redefinição pela supervisão |
-| Aprovação e assinatura gravadas pelo navegador (editáveis pelo DevTools) | Aprovar/devolver/assinar são rotas do servidor que conferem o papel e registram quem/quando; a assinatura é invalidada pelo servidor se o conteúdo mudar |
-| "Banco compartilhado" por arquivo .json no Drive (a última gravação apagava edições simultâneas) | Controle de versão: se outra pessoa salvou antes, a tela pergunta se recarrega ou mantém a sua versão |
-| E-mails, CNPJs, revisores e **tabela de preços (1.823 itens)** dentro do HTML | Fora do código e do git (`config/*.json`, `data/`); o catálogo só é entregue a usuários logados |
-| Mensuração de Custos dentro de uma string JavaScript de 444 KB | Página própria (`custos.html`) em 34 módulos, com a mesma sessão do portal |
-| Bibliotecas de CDN sem verificação (SheetJS 0.18.5 com CVE-2023-30533, PDF.js 3.11 com CVE-2024-4367, jsPDF 2.5.1) | Instaladas pelo npm e servidas pelo próprio servidor: SheetJS 0.20.3, PDF.js 6 (com `isEvalSupported:false`), jsPDF 4, Chart.js 4, Tesseract 7 (OCR com arquivos locais) |
-| Scripts e `onclick` inline | Política de segurança (CSP) sem script inline; proteção CSRF; cookie `HttpOnly` + `SameSite=Strict` |
-| Histórico de alterações escrito pelo navegador | Histórico escrito pelo servidor (autor = conta logada, horário do servidor) + trilha de auditoria |
-
-Os **cálculos de dimensionamento** (CTOs, APs, rack, eventos) foram só movidos para módulos: o teste
-`test/calculos.test.js` confere 81 casos contra o resultado do código original.
+| `.env.local` | URL do Supabase e chave publicável (a chave publicável pode ficar no site; a chave secreta nunca) |
+| `config/organizacao.json` | empresas do grupo, CNPJs, domínio de e-mail, revisores do relatório |
+| `data/catalogo-inicial.json` | tabela de preços |
+| `data/*.sql` | SQL gerado com os dados acima, para colar no Supabase |
 
 ## Estrutura
 
 ```
-server/            API (Node + Express + SQLite embutido do Node)
-  routes/          auth, usuários, visitas, custos, painéis
-  lib/             regras de negócio (visitas, custos, usuários, importação)
-  http.js          sessão, papéis, CSRF, CSP, limite de tentativas
-  seguranca.js     scrypt, tokens
-web/               interface (Vite)
-  index.html       portal: ambientes público / colaborador / supervisão, Visitas Técnicas
-  custos.html      Mensuração de Custos (aberta dentro do portal)
-  src/shared/      cliente da API
-  src/portal/      29 módulos do portal
-  src/custos/      34 módulos da Mensuração de Custos
-  css/             estilos (extraídos do original)
-scripts/           criar contas, importar dados antigos, backup, copiar arquivos do OCR
-config/            *.example.json (os .json reais ficam fora do git)
-data/              banco SQLite, catálogo inicial e backups (fora do git)
-test/              testes do servidor, dos cálculos, da importação e de navegador
+supabase/
+  migrations/              banco: tabelas, regras e funções (aplicadas pela integração GitHub ↔ Supabase)
+  functions/admin-usuarios/  criar conta, redefinir senha, mudar papel, desativar (somente supervisão)
+  config.toml              configuração da integração
+  primeiro-supervisor.sql  modelo para criar o primeiro supervisor
+  testes/seguranca.sql     testes das regras de segurança
+web/
+  index.html, custos.html  páginas
+  src/shared/api.js        ponte entre as telas e o Supabase
+  src/shared/supabase.js   cliente do Supabase
+  src/portal/              portal e Visitas Técnicas
+  src/custos/              Mensuração de Custos
+  css/, public/img/        estilos e imagens
+scripts/                   copiar arquivos do OCR, gerar SQL dos dados privados
+test/                      teste dos cálculos e teste no navegador (e2e)
+vercel.json                publicação na Vercel + cabeçalhos de segurança
 ```
 
-## O que fica fora do git
+## Colocar no ar (primeira vez)
 
-O `.gitignore` exclui:
+### 1. Supabase
 
-- `.env`: porta, pasta de dados, cookie seguro, proxy. Modelo: `.env.example`.
-- `config/organizacao.json`: nome, cidade, empresas do grupo e CNPJs, domínios de e-mail aceitos, revisores do relatório. Modelo: `config/organizacao.example.json`.
-- `config/usuarios-iniciais.json`: contas iniciais (e-mail, nome, cargo, papel), **sem senha**. Modelo: `config/usuarios-iniciais.example.json`.
-- `data/`: banco (`plataforma.sqlite`), `catalogo-inicial.json` (tabela de preços) e backups.
+1. Crie o projeto. Se for novo, de preferência na região **South America (São Paulo)**.
+2. Integre com o GitHub em **Project Settings → Integrations → GitHub**:
+   - repositório: este;
+   - **Working directory:** `.`;
+   - **Production branch:** `main`;
+   - marque **Deploy to production**.
 
-Nenhuma senha fica em arquivo: as senhas provisórias são geradas na hora e exibidas uma única vez.
+   A partir daí, as migrações de `supabase/migrations` e a função `admin-usuarios` são aplicadas sozinhas a cada push na `main`.
+3. Em **Authentication → Sign In / Providers**:
+   - desligue **Allow new users to sign up**, porque as contas são criadas só pela supervisão;
+   - em **Email**, exija senha com **mínimo de 8 caracteres** e **letras e números**.
+4. Em **Authentication → URL Configuration**, coloque em **Site URL** o endereço do site (ex.: o da Vercel).
+5. Carregue os dados privados. No seu computador, com `config/organizacao.json` e `data/catalogo-inicial.json` preenchidos, gere os arquivos SQL:
 
-## Instalação
+```bash
+npm run sql:privado
+```
 
-Requisitos: **Node.js 22.13 ou mais novo** (usa o SQLite embutido do Node). Funciona em Windows, Linux e macOS.
+   Depois cole `data/organizacao-supabase.sql` e `data/catalogo-supabase.sql` no **SQL Editor** e rode.
+6. Crie o primeiro supervisor seguindo `supabase/primeiro-supervisor.sql`.
+
+### 2. Vercel (site)
+
+1. **Add New → Project →** importe este repositório. As configurações já vêm do `vercel.json`.
+2. Em **Environment Variables**, cadastre `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` (os valores estão em **Supabase → Project Settings → API**).
+3. Clique em **Deploy**. A cada push na `main`, o site é atualizado sozinho.
+
+### 3. Equipe
+
+O supervisor entra no site e vai em **Ambiente da supervisão → Equipe → + Nova conta**. Cada pessoa recebe uma senha provisória e define a própria senha no primeiro acesso.
+
+## Migrar os dados da versão antiga (HTML)
+
+- **Visitas:** cada colaborador exporta o backup (.json) na versão antiga e importa em **Configurações → Banco de dados**. A supervisão pode importar os backups da equipe de uma vez em **Ambiente da supervisão**: cada visita vai para a conta com o mesmo e-mail.
+- **Orçamentos:** na Mensuração de Custos, **Configurações → Importar projetos (JSON da versão antiga)**.
+
+## Desenvolvimento
+
+Instale as dependências e crie o `.env.local` a partir do `.env.example`:
 
 ```bash
 npm ci
 ```
 
 ```bash
-cp .env.example .env
-cp config/organizacao.example.json config/organizacao.json
-cp config/usuarios-iniciais.example.json config/usuarios-iniciais.json
+cp .env.example .env.local
 ```
 
-1. Edite `config/organizacao.json` e `config/usuarios-iniciais.json` com os dados reais.
-2. Coloque a tabela de preços em `data/catalogo-inicial.json`, no formato de `config/catalogo.example.json`. Ela é carregada no banco na primeira execução.
-3. Crie as contas iniciais. O comando mostra a senha provisória de cada uma; entregue-as às pessoas.
-
-```bash
-npm run usuarios:semear
-```
-
-4. Gere a interface e suba o servidor:
-
-```bash
-npm run build
-```
-
-```bash
-npm start
-```
-
-Acesse `http://servidor:3000`. Contas avulsas também podem ser criadas por linha de comando:
-
-```bash
-npm run usuario:criar -- --email nome@empresa.com.br --nome "Nome Sobrenome" --papel supervisor
-```
-
-Depois disso, a supervisão cria e gerencia as contas em **Ambiente da supervisão → Equipe**.
-
-### Produção
-
-- Coloque o servidor atrás de HTTPS (nginx, IIS, Caddy ou Cloudflare Tunnel) e use `COOKIE_SECURE=true` no `.env`. Atrás de proxy, ajuste também `TRUST_PROXY=1`.
-- Mantenha o processo rodando com um serviço (systemd, NSSM no Windows ou pm2).
-- Faça backup diário do banco (pode rodar com o servidor ligado) e copie a pasta `data/backups` para outro local:
-
-```bash
-npm run backup
-```
-
-## Migrar os dados da versão antiga
-
-Os dados antigos estão no navegador de cada pessoa. Primeiro crie as contas (o dono de cada registro é encontrado pelo e-mail).
-
-1. **Visitas**: cada colaborador exporta em *Configurações → Banco de dados → Exportar backup* na versão antiga, ou a supervisão usa *Exportar base completa*.
-2. **Custos**: use o arquivo do "banco compartilhado" (.json) ou *Configurações → Exportar backup dos meus projetos*.
-3. Importe no servidor. `--dono` atribui a uma conta os registros sem e-mail correspondente; `--catalogo` também importa o catálogo do banco compartilhado.
-
-```bash
-npm run importar:legado -- backup_visitas.json base_custos.json --dono supervisor@empresa.com.br
-```
-
-Também dá para importar pela tela: colaborador em *Configurações*, supervisão em *Ambiente da supervisão*.
-
-- Aprovações antigas de visitas são mantidas e marcadas como "importada". Quando o colaborador importa pela tela, "Concluído" volta para "Em andamento", porque não dá para confirmar a aprovação antiga.
-- Aprovações antigas de orçamentos são ligadas ao supervisor de mesmo nome. As que não tiverem correspondente são listadas no relatório da importação.
-
-## Desenvolvimento
+Suba o site em modo de desenvolvimento (abre em `http://localhost:5173`):
 
 ```bash
 npm run dev
 ```
 
-A API sobe em `:3000` e a interface em `http://localhost:5173`, com recarga automática.
-
-Para rodar os testes:
-
-```bash
-npm test
-```
-
-Os testes cobrem servidor e segurança, regressão dos cálculos e importação (24 testes).
-
-Para o teste de fumaça no navegador, instale o Playwright uma vez:
-
-```bash
-npm i -D playwright && npx playwright install chromium
-```
-
-Depois gere a interface e rode o teste:
+Para gerar o site para publicação (pasta `web/dist`):
 
 ```bash
 npm run build
 ```
 
+Para rodar o teste dos cálculos (81 casos, iguais à versão antiga):
+
 ```bash
-npm run test:e2e
+npm test
 ```
 
-## Permissões
+Para o teste no navegador, use contas de **teste**:
 
-| Ação | Colaborador | Supervisão |
-|---|---|---|
-| Ver/editar visitas e orçamentos | próprios | todos |
-| Enviar visita para aprovação | ✔ | ✔ |
-| Aprovar/devolver visita, aprovar orçamento | – | ✔ (em nome próprio) |
-| Criar contas, redefinir senha, mudar papel, desativar | – | ✔ |
-| Ver valores dos orçamentos da equipe | – | ✔ |
-| Restaurar o catálogo inicial | – | ✔ |
-| Painel público (sem login) | só nome da demanda, responsável, tipo, status e data; nenhum valor, contato ou e-mail. Desligue com `"painelPublico": false` | |
+```bash
+E2E_SUP_EMAIL=... E2E_SUP_SENHA=... E2E_COLAB_EMAIL=... npm run test:e2e
+```
 
-As telas escondem o que a pessoa não pode fazer, mas **quem garante as permissões é o servidor**.
+Mudanças no banco entram como uma nova migração em `supabase/migrations/` (arquivo `AAAAMMDDHHMMSS_nome.sql`). Ela é aplicada ao chegar na `main`.
 
-## Limitações conhecidas / próximos passos
+## Limitações conhecidas
 
-- **Login com Google Workspace** não foi implementado. Hoje o login é por e-mail e senha do próprio sistema. Dá para acrescentar depois sem mudar o resto.
-- **Sem conexão**: a página avisa e reenvia as alterações quando a rede volta, mas é preciso entrar com a rede disponível e não fechar a aba enquanto houver pendências. O modo totalmente offline da versão antiga não existe mais.
-- O **OCR** roda localmente; a precisão continua dependendo da qualidade do documento escaneado.
-- **FiberControl** continua como "em breve".
+- **Sem conexão:** a página avisa e reenvia as alterações quando a rede volta, mas para entrar é preciso internet.
+- **Fotos das visitas:** continuam dentro do registro da visita. Se o volume crescer, o próximo passo é movê-las para o Supabase Storage.
+- **Plano grátis do Supabase:** o projeto é pausado após 7 dias sem nenhum acesso (os dados não se perdem; é só reativar no painel).
+- **Login com Google Workspace:** ainda não implementado. O Supabase Auth suporta, e dá para ligar depois.

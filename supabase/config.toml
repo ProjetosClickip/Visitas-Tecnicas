@@ -1,0 +1,10 @@
+# Configuração do Supabase usada pela integração com o GitHub.
+# Ao entrar na branch de produção (main):
+#  - as migrações novas de supabase/migrations são aplicadas no banco;
+#  - as Edge Functions declaradas abaixo são publicadas.
+# Configurações de login (Auth) são feitas no painel do Supabase (veja o README).
+project_id = "ueqvmhhkfoebwvietzvx"
+
+[functions.admin-usuarios]
+# só aceita chamadas com token de usuário logado; a função ainda confere se é supervisor
+verify_jwt = true

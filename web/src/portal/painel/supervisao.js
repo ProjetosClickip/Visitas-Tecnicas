@@ -39,7 +39,7 @@ async function renderSup() {
     $('#supVoltar').onclick = () => setEnv('col'); return;
   }
   let D;
-  try { D = await dadosPlataforma({ escopo: 'equipe' }); }
+  try { D = await dadosPlataforma({ escopo: 'equipe' }); if (ENV !== 'sup') return; }
   catch (e) { el.innerHTML = `<div class="empty"><h3>Não foi possível carregar o painel</h3><p>${esc(msgErro(e))}</p></div>`; return; }
   const B = dashBlocos(D), N = numerosDetalhados(D.visits), f = supFiltro;
   const pend = D.visits.filter(v => v.status === 'pending').sort((a, b) => (a.enviadoEm || a.updatedAt || '').localeCompare(b.enviadoEm || b.updatedAt || ''));

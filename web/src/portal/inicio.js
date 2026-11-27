@@ -3,11 +3,13 @@ import { avatarHTML, isSup, stPill } from './ambientes.js';
 import { S } from './estado.js';
 import { dashBlocos } from './painel/graficos.js';
 import { KIND, SISTEMAS, dadosPlataforma } from './plataforma.js';
-import { openSystem } from './sistemas.js';
+import { openSystem, sistemaAtual } from './sistemas.js';
 import { $, $$, esc } from './util.js';
 
 async function renderInicio() {
   const u = S.user, D = await dadosPlataforma();
+  // a resposta pode chegar depois de a pessoa ter aberto outra tela: não desenha por cima
+  if (sistemaAtual() !== 'inicio' || S.user !== u) return;
   const meus = D.items.filter(x => x.userId === u.id);
   const B = dashBlocos({ items: meus, umap: D.umap, users: D.users });
   const n = (f) => meus.filter(f).length;

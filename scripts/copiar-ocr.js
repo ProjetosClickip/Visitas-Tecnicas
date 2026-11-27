@@ -5,7 +5,9 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { RAIZ } from '../server/config.js';
+import { fileURLToPath } from 'node:url';
+
+const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const nm = path.join(RAIZ, 'node_modules');
 const destino = path.join(RAIZ, 'web', 'public', 'vendor', 'ocr');

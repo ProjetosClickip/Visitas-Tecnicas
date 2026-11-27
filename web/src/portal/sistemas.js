@@ -32,4 +32,7 @@ function openSystem(id, opts) {
   }
 }
 
-export { openSystem, setSysbar, showPane };
+/** Sistema aberto agora (telas que carregam dados conferem antes de se desenhar). */
+const sistemaAtual = () => SYS;
+
+export { openSystem, setSysbar, showPane, sistemaAtual };

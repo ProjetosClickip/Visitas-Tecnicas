@@ -1,6 +1,0 @@
-{
-  "usuarios": [
-    { "email": "supervisor@suaempresa.com.br", "nome": "Nome do Supervisor", "cargo": "Supervisão de Projetos", "papel": "supervisor" },
-    { "email": "colaborador@suaempresa.com.br", "nome": "Nome do Colaborador", "cargo": "Engenharia / Projetos", "papel": "colaborador" }
-  ]
-}

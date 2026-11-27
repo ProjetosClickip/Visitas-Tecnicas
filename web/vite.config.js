@@ -6,6 +6,8 @@ const raiz = import.meta.dirname;
 export default defineConfig({
   root: raiz,
   publicDir: resolve(raiz, 'public'),
+  // variáveis VITE_SUPABASE_* ficam em .env.local na raiz do repositório (fora do git)
+  envDir: resolve(raiz, '..'),
   build: {
     outDir: resolve(raiz, 'dist'),
     emptyOutDir: true,
@@ -18,9 +20,5 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    port: 5173,
-    // em desenvolvimento a API roda em http://localhost:3000 (npm run dev sobe os dois)
-    proxy: { '/api': 'http://localhost:3000' },
-  },
+  server: { port: 5173 },
 });
