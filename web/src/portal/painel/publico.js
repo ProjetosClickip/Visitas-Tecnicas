@@ -39,7 +39,7 @@ async function renderPublico() {
       ${dem.length ? `<div class="dem-list">${dem.slice(0, 200).map(x => { const u = D.umap[x.userId] || { name: x.userName || 'Usuário' }; return `<div class="dem"><span class="pill ${KIND[x.k].pill}">${KIND[x.k].n}</span><b class="dem-n">${esc(x.nome)}</b><span class="dem-a">➜</span><span class="dem-u">${avatarHTML(u, 24)}${esc(u.name)}</span>${stPill(x.status)}</div>`; }).join('')}</div>` : '<div class="empty" style="padding:24px">Nenhuma demanda encontrada.</div>'}
     </div></div>
   </div>
-  <p class="small muted" style="text-align:center;margin-top:16px">🔒 Ambiente público: exibe apenas o nome da demanda e o responsável – nenhum dado técnico, de contato ou valor de orçamento. Painel consolidado com os dados de toda a equipe.</p>`;
+  <p class="small muted" style="text-align:center;margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg> Ambiente público: exibe apenas o nome da demanda e o responsável – nenhum dado técnico, de contato ou valor de orçamento. Painel consolidado com os dados de toda a equipe.</p>`;
   $('#pbQ').oninput = e => { pubFiltro.q = e.target.value; clearTimeout(S.pbT); S.pbT = setTimeout(async () => { await renderPublico(); const i = $('#pbQ'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 300); };
   $('#pbT').onchange = e => { pubFiltro.t = e.target.value; renderPublico(); };
 }

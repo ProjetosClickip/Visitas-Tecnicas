@@ -3,49 +3,119 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#13294b">
+<meta name="theme-color" content="#0c1c35">
 <title>Click IP · Plataforma de Projetos</title>
 <link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="preload" href="/fonts/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script type="module" src="/src/portal/main.js"></script>
 </head>
 <body>
-<header class="hdr"><div class="hdr-in">
-  <div class="hdr-logo"><img src="/img/logo-portal.png" alt="I_MAIS Click IP"></div>
-  <div class="hdr-t"><span class="kicker">GRUPO CLICK IP · ENGENHARIA / PLANEJAMENTO E IMPLANTAÇÃO DE PROJETOS</span><h1>Plataforma de Projetos Click IP</h1><p>Visitas Técnicas · Mensuração de Custos · ClickIP FiberControl (em integração)</p></div>
-  <div class="who" id="whoBox"></div>
-</div></header>
-<nav class="envs"><div class="envs-in">
-  <button data-env="pub" class="on">🌐 Ambiente público</button>
-  <button data-env="col">🧑‍💻 Ambiente do colaborador</button>
-  <button data-env="sup">🛡️ Ambiente da supervisão</button>
-  <span class="spacer"></span><span id="net" class="net on">● Online</span><span class="pill local" title="Dados armazenados no servidor da plataforma">Servidor</span>
-</div></nav>
-<section id="envPub"><main id="pubMain"></main></section>
-<section id="envCol" class="hidden">
-  <main id="colLogin"></main>
-  <div id="app" class="hidden">
-    <nav class="sysbar"><div class="sysbar-in">
-      <button data-sys="inicio" class="on">🏠 Início</button>
-      <span class="sys-sep">Sistemas</span>
-      <button data-sys="visitas">📋 Visitas Técnicas</button>
-      <button data-sys="custos">💰 Mensuração de Custos</button>
-      <button data-sys="fiber">🛰️ FiberControl <small>em breve</small></button>
-      <span class="spacer"></span>
-      <button data-sys="perfil">⚙️ Perfil</button>
-    </div></nav>
-    <nav class="tabs"><div class="tabs-in">
-      <button data-tab="hist" class="on">🗂️ Histórico</button>
-      <button data-tab="cond"><span class="dot" style="background:#9fb3d6"></span>Condomínios</button>
-      <button data-tab="corp"><span class="dot" style="background:#1fb8b3"></span>Link Dedicado</button>
-      <button data-tab="evt"><span class="dot" style="background:#f26a21"></span>Eventos</button>
-      <button data-tab="cfg">⚙️ Configurações</button>
-    </div></nav>
-    <main id="main"></main>
-    <div id="custosWrap" class="hidden"></div>
+<a class="skip" href="#palco">Pular para o conteúdo</a>
+
+<!-- Ícones (traço único 1.75, estilo Lucide) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></symbol>
+  <symbol id="i-fiber" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 12h5m0 0 5-5.5M12 12l5 5.5"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M21.5 20a6.5 6.5 0 0 0-4-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+  <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m20 11.5-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></symbol>
+  <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l5.5 16 2.3-6.7L19.5 10Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M3 15 15 3l6 6L9 21Z"/><path d="m7 11 2 2M10 8l2 2M13 5l2 2"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.5L3 9M3 4v5h5M4 13a8 8 0 0 0 14.6 4.5L21 15M21 20v-5h-5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+</svg>
+
+<div class="shell">
+  <!-- ============ MENU LATERAL (minimalista) ============ -->
+  <aside class="rail" id="menuLateral" aria-label="Menu principal">
+    <div class="rail-top">
+      <img class="rail-logo" src="/img/logo-portal.png" alt="I_MAIS Click IP">
+      <button type="button" class="rail-x" id="menuFechar" aria-label="Fechar menu"><svg class="ic"><use href="#i-close"/></svg></button>
+    </div>
+
+    <div class="rail-scroll">
+      <nav class="envs" aria-label="Ambiente"><div class="envs-in">
+        <p class="rail-h">Ambiente</p>
+        <button data-env="pub" class="on"><svg class="ic"><use href="#i-globe"/></svg>Público</button>
+        <button data-env="col"><svg class="ic"><use href="#i-user"/></svg>Colaborador</button>
+        <button data-env="sup"><svg class="ic"><use href="#i-shield"/></svg>Supervisão</button>
+      </div></nav>
+
+      <div class="rail-app" id="railApp">
+        <nav class="sysbar" aria-label="Sistemas"><div class="sysbar-in">
+          <p class="rail-h">Sistemas</p>
+          <button data-sys="inicio" class="on"><svg class="ic"><use href="#i-home"/></svg>Início</button>
+          <button data-sys="visitas"><svg class="ic"><use href="#i-clip"/></svg>Visitas Técnicas</button>
+          <nav class="tabs" aria-label="Visitas Técnicas"><div class="tabs-in">
+            <button data-tab="hist" class="on">Histórico</button>
+            <button data-tab="cond"><span class="dot" style="--d:#3b6fb6"></span>Condomínios</button>
+            <button data-tab="corp"><span class="dot" style="--d:#159c98"></span>Link Dedicado</button>
+            <button data-tab="evt"><span class="dot" style="--d:#f26a21"></span>Eventos</button>
+            <button data-tab="cfg">Configurações</button>
+          </div></nav>
+          <button data-sys="custos"><svg class="ic"><use href="#i-calc"/></svg>Mensuração de Custos</button>
+          <button data-sys="fiber"><svg class="ic"><use href="#i-fiber"/></svg>FiberControl<small>em breve</small></button>
+          <button data-sys="perfil"><svg class="ic"><use href="#i-cog"/></svg>Perfil</button>
+        </div></nav>
+      </div>
+    </div>
+
+    <div class="rail-foot">
+      <div class="who" id="whoBox"></div>
+      <span id="net" class="net on">● Online</span>
+    </div>
+  </aside>
+  <div class="scrim" id="menuScrim" aria-hidden="true"></div>
+
+  
+<!-- ============ PALCO ============ -->
+  <div class="stage" id="palco" tabindex="-1">
+    <header class="hdr">
+      <button type="button" class="menu-bt" id="menuBt" aria-controls="menuLateral" aria-expanded="false" aria-label="Abrir menu"><svg class="ic"><use href="#i-menu"/></svg></button>
+      <div class="hdr-t">
+        <h1>Plataforma de Projetos Click IP</h1>
+        <span class="crumb" aria-hidden="true"></span>
+      </div>
+    </header>
+
+    <section id="envPub"><main id="pubMain"></main></section>
+    <section id="envCol" class="hidden">
+      <main id="colLogin"></main>
+      <div id="app" class="hidden">
+        <main id="main"></main>
+        <div id="custosWrap" class="hidden"></div>
+      </div>
+    </section>
+    <section id="envSup" class="hidden"><main id="supMain"></main></section>
+
+    <footer class="foot">Grupo Click IP · I_MAIS · Engenharia / Planejamento e Implantação de Projetos<span>Visitas Técnicas · Mensuração de Custos · FiberControl</span></footer>
   </div>
-</section>
-<section id="envSup" class="hidden"><main id="supMain"></main></section>
-<footer class="foot">Grupo Click IP · I_MAIS · Engenharia / Planejamento e Implantação de Projetos<br><span>Plataforma de Projetos · Visitas Técnicas · Mensuração de Custos</span></footer>
-<div id="toast"></div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

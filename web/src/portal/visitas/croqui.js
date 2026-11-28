@@ -238,7 +238,7 @@ function initCroqui(v) {
   if (!v.plan) {
     const a = v.type === 'cond' ? {} : areaOf((v.type === 'corp' ? v.corp : v.evt).area);
     box.innerHTML = `<div class="empty" style="padding:28px"><h3>Nenhuma planta carregada</h3><p>Carregue a planta baixa (JPG/PNG – foto ou print do projeto) para desenhar o croqui com as informações levantadas, ou gere uma base quadriculada a partir das medidas.</p>
-      <div class="row" style="justify-content:center"><label class="btn primary">📐 Carregar planta baixa<input type="file" id="cqUp" accept="image/*" hidden></label>
+      <div class="row" style="justify-content:center"><label class="btn primary"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Carregar planta baixa<input type="file" id="cqUp" accept="image/*" hidden></label>
       <button class="btn navy" id="cqGrid">${a.W && a.L ? `Gerar base ${fmt(a.W, 0)} × ${fmt(a.L, 0)} m` : 'Gerar base quadriculada'}</button></div></div>`;
     $('#cqUp').onchange = e => loadPlanFile(e.target.files[0]);
     $('#cqGrid').onclick = () => {
@@ -254,17 +254,17 @@ function initCroqui(v) {
   const els = EL_BY_VISIT[v.type].filter(t => t !== 'casa' || v.cond.kind === 'horizontal').filter(t => t !== 'torre' || v.type !== 'cond' || v.cond.kind !== 'horizontal');
   box.innerHTML = `
     <div class="cq-tools" id="cqTools">
-      <button data-tool="sel" class="on">🖱️ Selecionar</button><button data-tool="del">🗑️ Apagar</button><button data-tool="scale">📏 Calibrar escala</button>
+      <button data-tool="sel" class="on"><svg class="ic" aria-hidden="true"><use href="#i-cursor"/></svg> Selecionar</button><button data-tool="del"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Apagar</button><button data-tool="scale"><svg class="ic" aria-hidden="true"><use href="#i-ruler"/></svg> Calibrar escala</button>
       ${els.map(t => `<button data-tool="el:${t}"><span class="sw" style="background:${EL_TYPES[t].c}"></span>${EL_TYPES[t].l}</button>`).join('')}
     </div>
     <div class="cq-tools">
       ${RT_BY_VISIT[v.type].map(t => `<button data-tool="rt:${t}" form-tool><span style="width:16px;height:3px;background:${RT_TYPES[t].c};display:inline-block"></span>${RT_TYPES[t].l}</button>`).join('')}
-      <button id="cqFin" class="">✔ Concluir rota</button>
+      <button id="cqFin" class=""><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Concluir rota</button>
     </div>
     <div class="cq-tools">
-      ${v.type === 'cond' ? `<button id="cqAutoT">🏢 Inserir ${v.cond.kind === 'horizontal' ? 'CTOs' : 'torres'} automaticamente</button>` : `<button id="cqAutoAP">📡 Posicionar APs</button><button id="cqRack">🗄️ Sugerir rack</button>`}
-      <button id="cqUndo">↶ Desfazer</button><label class="btn sm" style="font-size:13px">🔄 Trocar planta<input type="file" id="cqUp2" accept="image/*" hidden></label>
-      <button id="cqPng">⬇ PNG do croqui</button><button id="cqClr" style="color:var(--bad)">Remover planta</button>
+      ${v.type === 'cond' ? `<button id="cqAutoT"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg> Inserir ${v.cond.kind === 'horizontal' ? 'CTOs' : 'torres'} automaticamente</button>` : `<button id="cqAutoAP"><svg class="ic" aria-hidden="true"><use href="#i-wifi"/></svg> Posicionar APs</button><button id="cqRack"><svg class="ic" aria-hidden="true"><use href="#i-server"/></svg> Sugerir rack</button>`}
+      <button id="cqUndo">↶ Desfazer</button><label class="btn sm" style="font-size:13px"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg> Trocar planta<input type="file" id="cqUp2" accept="image/*" hidden></label>
+      <button id="cqPng"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> PNG do croqui</button><button id="cqClr" style="color:var(--bad)">Remover planta</button>
     </div>
     <div class="cq-wrap"><div><div class="cq-canvas-box"><canvas id="cqCv"></canvas></div><div class="cq-status" id="cqStatus"></div></div><div class="cq-side" id="cqSide"></div></div>`;
   const cv = $('#cqCv'); cv.width = p.w; cv.height = p.h; CQ.cv = cv; CQ.ctx = cv.getContext('2d');
@@ -284,7 +284,7 @@ function initCroqui(v) {
   if ($('#cqAutoT')) $('#cqAutoT').onclick = autoTowers;
   if (!CQ._key) { CQ._key = true; document.addEventListener('keydown', e => { if (!CQ.cv || !document.body.contains(CQ.cv)) return; if (e.target.matches('input,textarea,select')) return; if (e.key === 'Enter') CQ.finishRoute(); if (e.key === 'Escape') { CQ.st.draft = null; CQ.st.scaleA = null; CQ.draw(); } if ((e.key === 'Delete' || e.key === 'Backspace') && CQ.st.sel) { CQ.snap(); CQ.p.elements = CQ.p.elements.filter(x => x.id !== CQ.st.sel); CQ.p.routes = CQ.p.routes.filter(x => x.id !== CQ.st.sel); CQ.st.sel = null; CQ.changed(); } }); }
   CQ.setTool('sel'); CQ.draw();
-  if (!p.scale) CQ.status('Dica: calibre a escala (📏) clicando nas extremidades de uma medida conhecida da planta.');
+  if (!p.scale) CQ.status('Dica: calibre a escala clicando nas extremidades de uma medida conhecida da planta.');
 }
 async function loadPlanFile(f, keep) {
   if (!f) return; if (f.type === 'application/pdf') return pdfFirstPageNote();

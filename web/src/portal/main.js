@@ -8,6 +8,7 @@ import { go } from './navegacao.js';
 import { limparSessaoLocal, startSession } from './sessao.js';
 import { openSystem } from './sistemas.js';
 import { applyTheme } from './tema.js';
+import { iniciarMenuLateral } from './menu-lateral.js';
 import { $, $$, toast } from './util.js';
 import { haAlteracoesPendentes, saveNow } from './visitas/lista.js';
 
@@ -26,7 +27,7 @@ window.addEventListener('cip:trocar-senha', () => { if (S.user) renderTrocarSenh
 const envDe = x => x === 'colaborador' ? 'col' : x === 'supervisao' ? 'sup' : x === 'publico' ? 'pub' : null;
 
 async function iniciar() {
-  netState();
+  netState(); iniciarMenuLateral();
   $$('.tabs-in button').forEach(b => b.onclick = () => go(b.dataset.tab));
   $$('.envs-in [data-env]').forEach(b => b.onclick = () => setEnv(b.dataset.env));
   $$('.sysbar-in [data-sys]').forEach(b => b.onclick = () => openSystem(b.dataset.sys));

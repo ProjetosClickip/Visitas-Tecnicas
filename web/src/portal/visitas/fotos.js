@@ -19,7 +19,7 @@ async function addPhotos(files) {
 function renderPhotos() {
   const el = $('#phList'); if (!el) return; const v = S.cur;
   $('#phCount').textContent = v.photos.length ? v.photos.length + ' foto(s)' : '';
-  el.innerHTML = v.photos.map((p, i) => `<div class="ph"><img src="${p.data}" data-zoom="${i}"><input type="text" data-cap="${i}" value="${esc(p.caption)}" placeholder="Legenda"><div class="x"><span>Figura ${i + 1}</span><span><button class="btn sm" data-mv="${i}" title="Mover para trás">◀</button> <button class="btn sm danger" data-rm="${i}">✕</button></span></div></div>`).join('');
+  el.innerHTML = v.photos.map((p, i) => `<div class="ph"><img src="${p.data}" data-zoom="${i}"><input type="text" data-cap="${i}" value="${esc(p.caption)}" placeholder="Legenda"><div class="x"><span>Figura ${i + 1}</span><span><button class="btn sm" data-mv="${i}" title="Mover para trás"><svg class="ic" aria-hidden="true"><use href="#i-chevron-left"/></svg></button> <button class="btn sm danger" data-rm="${i}">✕</button></span></div></div>`).join('');
   $$('[data-zoom]', el).forEach(i => i.onclick = () => lightbox(i.src));
   $$('[data-cap]', el).forEach(i => i.oninput = () => { v.photos[+i.dataset.cap].caption = i.value; scheduleSave(); });
   $$('[data-rm]', el).forEach(b => b.onclick = () => { v.photos.splice(+b.dataset.rm, 1); scheduleSave(); renderPhotos(); });

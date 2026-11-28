@@ -9,11 +9,11 @@ import { $, esc, readImage, toast, urlImg } from '../util.js';
 function perfilMidiaHTML() {
   const u = S.user;
   return `<div class="pf-banner" style="${urlImg(u.banner) ? `background-image:url(${urlImg(u.banner)})` : ''}">
-      <label class="btn sm pf-bbtn">🖼️ ${u.banner ? 'Trocar banner' : 'Adicionar banner'}<input type="file" id="pfBanIn" accept="image/*" hidden></label>
+      <label class="btn sm pf-bbtn"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> ${u.banner ? 'Trocar banner' : 'Adicionar banner'}<input type="file" id="pfBanIn" accept="image/*" hidden></label>
       ${u.banner ? '<button class="btn sm pf-bdel" id="pfBanDel">Remover</button>' : ''}
       <div class="pf-av"><label title="Trocar foto de perfil">${avatarHTML(u, 96)}<input type="file" id="pfAvIn" accept="image/*" hidden></label>${u.avatar ? '<button class="btn sm" id="pfAvDel" style="margin-top:4px">Remover foto</button>' : ''}</div>
     </div>
-    <div class="pf-name"><h3>${esc(u.name)}</h3><span class="muted">${esc(u.role || '')}${u.email ? ' · ' + esc(u.email) : ''}</span>${isSup(u) ? ' <span class="pill done">🛡️ Supervisão</span>' : ''}</div>`;
+    <div class="pf-name"><h3>${esc(u.name)}</h3><span class="muted">${esc(u.role || '')}${u.email ? ' · ' + esc(u.email) : ''}</span>${isSup(u) ? ' <span class="pill done">Supervisão</span>' : ''}</div>`;
 }
 function cropImage(file, w, h, q = 0.85) {
   return new Promise(async res => {

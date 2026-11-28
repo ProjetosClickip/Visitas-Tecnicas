@@ -7,9 +7,9 @@ function evtTerminoHint(e) {
   const dias = iOr(e.dias, 1); if (!e.inicio) return '';
   const prev = evtDataAdd(e.inicio, dias - 1);
   if (!e.termino) return `previsto: ${dtBR(prev)} (${dias} dias)`;
-  if (e.termino < e.inicio) return '⚠ término anterior ao início';
+  if (e.termino < e.inicio) return 'Atenção: término anterior ao início';
   const n = Math.round((new Date(e.termino + 'T12:00:00') - new Date(e.inicio + 'T12:00:00')) / 864e5) + 1;
-  return n === dias ? `${n} dias de evento` : `⚠ período de ${n} dias – diferente da quantidade informada (${dias})`;
+  return n === dias ? `${n} dias de evento` : `Atenção: período de ${n} dias – diferente da quantidade informada (${dias})`;
 }
 function evtPeriodo(e) {
   const dias = iOr(e.dias, 1);

@@ -38,10 +38,10 @@ function secLocal(n) {
     ${fld('Ponto de referência', 'loc.referencia', { cls: 'span2' })}
   </div>
   <div class="row" style="margin-top:12px">
-    <button class="btn" id="btnGPS">📍 Usar GPS do dispositivo</button>
+    <button class="btn" id="btnGPS"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> Usar GPS do dispositivo</button>
     <label class="btn">Importar ponto KML<input type="file" id="kmlIn" accept=".kml" hidden></label>
-    <a class="btn ${has ? '' : 'hidden'}" id="lnkMaps" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${l.lat},${l.lon}">Google Maps ↗</a>
-    <a class="btn ${has ? '' : 'hidden'}" id="lnkEarth" target="_blank" rel="noopener" href="https://earth.google.com/web/search/${l.lat},${l.lon}">Google Earth ↗</a>
+    <a class="btn ${has ? '' : 'hidden'}" id="lnkMaps" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${l.lat},${l.lon}">Google Maps <svg class="ic" aria-hidden="true"><use href="#i-external"/></svg></a>
+    <a class="btn ${has ? '' : 'hidden'}" id="lnkEarth" target="_blank" rel="noopener" href="https://earth.google.com/web/search/${l.lat},${l.lon}">Google Earth <svg class="ic" aria-hidden="true"><use href="#i-external"/></svg></a>
     <button class="btn teal" data-act="kml">Exportar KML</button><button class="btn teal" data-act="kmz">Exportar KMZ</button>
   </div>
   <p class="small muted" style="margin-bottom:0">Links do Maps/Earth exigem internet; os arquivos KML/KMZ são gerados offline e abrem no Google Earth (inclui croqui georreferenciado quando a escala estiver calibrada).</p>`);
@@ -72,7 +72,7 @@ function secInfra(n) {
 }
 function secFotos(n) {
   return card('fotos', n, 'Registro fotográfico', `
-    <label class="drop" id="phDrop">📷 Toque para tirar/selecionar fotos ou arraste imagens aqui<input type="file" id="phIn" accept="image/*" multiple hidden></label>
+    <label class="drop" id="phDrop"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg> Toque para tirar/selecionar fotos ou arraste imagens aqui<input type="file" id="phIn" accept="image/*" multiple hidden></label>
     <div class="photos" id="phList"></div>`, `<span class="small muted" id="phCount"></span>`);
 }
 function secObs(n, title) {

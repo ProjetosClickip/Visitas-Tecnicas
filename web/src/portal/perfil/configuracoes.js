@@ -26,7 +26,7 @@ function renderSettings() {
     <label class="f">E-mail <span class="hint">(identifica a conta – não editável)</span><input type="email" id="pfEmail" value="${esc(S.user.email || '')}" readonly></label>
     <div class="span3"><div style="font-size:13px;font-weight:600;color:var(--navy-2);margin-bottom:6px">Assinatura eletrônica da conta</div>
       <div class="row"><div style="border:1px dashed var(--line);border-radius:10px;height:80px;width:260px;display:flex;align-items:center;justify-content:center;background:#fff">${S.user.assinatura && S.user.assinatura.img ? `<img src="${esc(S.user.assinatura.img)}" style="max-height:70px;max-width:95%">` : '<span class="small muted">Nenhuma</span>'}</div>
-      <button class="btn sm" id="pfSig">${S.user.assinatura && S.user.assinatura.img ? 'Alterar assinatura' : '✍️ Cadastrar assinatura'}</button>${S.user.assinatura && S.user.assinatura.cpf ? `<span class="small muted">CPF ${esc(cpfMask(S.user.assinatura.cpf))}</span>` : ''}</div>
+      <button class="btn sm" id="pfSig">${S.user.assinatura && S.user.assinatura.img ? 'Alterar assinatura' : 'Cadastrar assinatura'}</button>${S.user.assinatura && S.user.assinatura.cpf ? `<span class="small muted">CPF ${esc(cpfMask(S.user.assinatura.cpf))}</span>` : ''}</div>
       <p class="small muted" style="margin:6px 0 0">Usada para assinar os relatórios (última folha do PDF), mediante confirmação da senha da conta.</p></div>
     ${segurancaHTML()}
   </div></div>
