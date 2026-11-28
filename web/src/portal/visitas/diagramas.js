@@ -7,8 +7,8 @@ import { scheduleSave } from './lista.js';
 
 function secDiag(n) {
   const d = isDupla(S.cur), simples = S.cur.type === 'corp';
-  const btns = ab => `<label class="btn navy">🔗 Adicionar diagrama da caixa de emenda${simples ? ' de abordagem' : ''}<input type="file" data-dgin="ceo|${ab}" accept="image/png,image/jpeg" multiple hidden></label>
-    <label class="btn teal">🏢 Adicionar diagrama do ${ab === 2 ? '2º ' : ''}POP de abordagem<input type="file" data-dgin="pop|${ab}" accept="image/png,image/jpeg" multiple hidden></label>`;
+  const btns = ab => `<label class="btn navy"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg> Adicionar diagrama da caixa de emenda${simples ? ' de abordagem' : ''}<input type="file" data-dgin="ceo|${ab}" accept="image/png,image/jpeg" multiple hidden></label>
+    <label class="btn teal"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg> Adicionar diagrama do ${ab === 2 ? '2º ' : ''}POP de abordagem<input type="file" data-dgin="pop|${ab}" accept="image/png,image/jpeg" multiple hidden></label>`;
   return card('diag', n, d ? 'Caixas de emenda e POPs – dupla abordagem' : 'Caixas de emenda (CEO) e POP de abordagem', `
     <p class="small muted" style="margin-top:0">Envie os diagramas de fusão (PNG/JPEG) das caixas de emenda que serão fusionadas no trecho e do POP de abordagem. Os dados entram na tabela de detalhamento de fusões do relatório e, com coordenadas, no KML/KMZ.</p>
     ${d ? `<div class="row" style="margin-bottom:8px"><b style="min-width:110px">Abordagem 1</b>${btns(1)}</div><div class="row"><b style="min-width:110px">Abordagem 2</b>${btns(2)}</div>` : `<div class="row">${btns(1)}</div>`}

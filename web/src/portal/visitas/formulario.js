@@ -47,8 +47,8 @@ function renderForm(v) {
   $('#main').innerHTML = `
   <div class="page-h"><button class="btn sm" id="btnBack">← Voltar</button><span class="pill ${TYPES[t].pill}">${TYPES[t].nome}</span><h2 id="formTitle">${esc(visitTitle(v))}</h2><div class="spacer"></div>
     <label class="f st-sel">Status<select id="stSel">${Object.keys(STATUS).map(s => `<option value="${s}" ${(v.status || 'draft') === s ? 'selected' : ''} ${s === 'done' && !isSup(S.user) && v.status !== 'done' ? 'disabled' : ''}>${STATUS[s].l}${s === 'done' && !isSup(S.user) ? ' (supervisão)' : ''}</option>`).join('')}</select></label></div>
-  ${v.devolucao && v.status === 'draft' ? `<div class="note warn" style="margin:-6px 0 14px">↩ <b>Devolvido para ajustes</b> por ${esc(v.devolucao.por)} em ${dtHrBR(v.devolucao.em)}: ${esc(v.devolucao.motivo)}</div>` : ''}
-  ${v.aprovacao && v.status === 'done' ? `<div class="note" style="margin:-6px 0 14px">✔ <b>Aprovado</b> por ${esc(v.aprovacao.por)} em ${dtHrBR(v.aprovacao.em)}${v.aprovacao.obs ? ': ' + esc(v.aprovacao.obs) : ''}</div>` : ''}
+  ${v.devolucao && v.status === 'draft' ? `<div class="note warn" style="margin:-6px 0 14px"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg> <b>Devolvido para ajustes</b> por ${esc(v.devolucao.por)} em ${dtHrBR(v.devolucao.em)}: ${esc(v.devolucao.motivo)}</div>` : ''}
+  ${v.aprovacao && v.status === 'done' ? `<div class="note" style="margin:-6px 0 14px"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> <b>Aprovado</b> por ${esc(v.aprovacao.por)} em ${dtHrBR(v.aprovacao.em)}${v.aprovacao.obs ? ': ' + esc(v.aprovacao.obs) : ''}</div>` : ''}
   <div class="layout"><aside class="side">${secs.map(([id, l]) => `<a href="#sec-${id}" data-jump="${id}">${l}</a>`).join('')}</aside>
   <div class="form-body">${body}
     <div class="savebar"><span class="st" id="saveState">Salvo automaticamente</span>
@@ -67,7 +67,7 @@ function renderForm(v) {
 function secEstrutura(n) {
   const c = S.cur.cond, vert = (c.kind || 'vertical') === 'vertical';
   return card('est', n, 'Estrutura do condomínio', `
-    <div style="margin-bottom:12px">${seg('cond.kind', [['vertical', '🏢 Vertical (torres)'], ['horizontal', '🏘️ Horizontal (casas)']])}</div>
+    <div style="margin-bottom:12px">${seg('cond.kind', [['vertical', 'Vertical (torres)'], ['horizontal', 'Horizontal (casas)']])}</div>
     <div class="grid g4">
     ${vert ? `
       ${fld('Quantidade de torres / blocos', 'cond.torres', { type: 'number' })}

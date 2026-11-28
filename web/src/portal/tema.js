@@ -31,12 +31,12 @@ function aparenciaCard() {
   const p = prefsAtuais();
   return `<div class="card"><div class="card-h"><h3>Aparência</h3></div><div class="card-b">
     <div style="font-size:13px;font-weight:600;margin-bottom:6px">Tema</div>
-    <div class="seg">${[['claro', '☀️ Claro'], ['escuro', '🌙 Escuro'], ['auto', '🖥️ Automático']].map(([k, l]) => `<button type="button" data-tema="${k}" class="${(p.tema || 'claro') === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="seg">${[['claro', 'Claro'], ['escuro', 'Escuro'], ['auto', 'Automático']].map(([k, l]) => `<button type="button" data-tema="${k}" class="${(p.tema || 'claro') === k ? 'on' : ''}">${l}</button>`).join('')}</div>
     <div style="font-size:13px;font-weight:600;margin:14px 0 6px">Cor de destaque</div>
     <div class="row">${Object.entries(CORES).map(([k, c]) => `<button type="button" class="swatch ${(p.cor || 'laranja') === k ? 'on' : ''}" data-cor="${k}" title="${c[0]}" style="background:${c[1]}"></button>`).join('')}</div>
     <div style="font-size:13px;font-weight:600;margin:14px 0 6px">Papel de parede / fundo</div>
     <div class="walls">${Object.entries(FUNDOS).map(([k, f]) => `<button type="button" class="wall ${(p.fundo || 'nenhum') === k ? 'on' : ''}" data-fundo="${k}" style="background:${f[1] || 'var(--bg)'}"><span>${f[0]}</span></button>`).join('')}
-      <label class="wall ${p.fundo === 'imagem' ? 'on' : ''}" style="${p.fundoImg ? `background:url(${p.fundoImg}) center/cover` : ''}"><span>📷 Minha imagem</span><input type="file" id="wallIn" accept="image/*" hidden></label></div>
+      <label class="wall ${p.fundo === 'imagem' ? 'on' : ''}" style="${p.fundoImg ? `background:url(${p.fundoImg}) center/cover` : ''}"><span>Minha imagem</span><input type="file" id="wallIn" accept="image/*" hidden></label></div>
   </div></div>`;
 }
 function bindAparencia(after) {

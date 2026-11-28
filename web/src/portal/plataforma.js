@@ -4,9 +4,9 @@ import { S } from './estado.js';
 
 
 const SISTEMAS = [
-  { id: 'visitas', nome: 'Visitas Técnicas', ic: '📋', desc: 'Levantamento em campo, dimensionamento (CTOs, APs, rack), croqui, KML/KMZ e projeto executivo em PDF.', cor: '#159c98' },
-  { id: 'custos', nome: 'Mensuração de Custos', ic: '💰', desc: 'Orçamento de projetos: materiais de obra e ativação, serviços, prestadoras, catálogo, relatórios PDF/Excel e aprovação.', cor: '#7a3db8' },
-  { id: 'fiber', nome: 'ClickIP FiberControl', ic: '🛰️', desc: 'Controle da rede óptica (em integração).', cor: '#f26a21', breve: true }
+  { id: 'visitas', nome: 'Visitas Técnicas', ic: '<svg class="ic" aria-hidden="true"><use href="#i-clip"/></svg>', desc: 'Levantamento em campo, dimensionamento (CTOs, APs, rack), croqui, KML/KMZ e projeto executivo em PDF.', cor: '#159c98' },
+  { id: 'custos', nome: 'Mensuração de Custos', ic: '<svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg>', desc: 'Orçamento de projetos: materiais de obra e ativação, serviços, prestadoras, catálogo, relatórios PDF/Excel e aprovação.', cor: '#7a3db8' },
+  { id: 'fiber', nome: 'ClickIP FiberControl', ic: '<svg class="ic" aria-hidden="true"><use href="#i-fiber"/></svg>', desc: 'Controle da rede óptica (em integração).', cor: '#f26a21', breve: true }
 ];
 /* tipos de demanda de todos os subsistemas (para os painéis) */
 const KIND = {

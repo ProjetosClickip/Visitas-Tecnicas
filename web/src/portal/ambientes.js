@@ -42,7 +42,7 @@ function setEnv(e, noHash) {
 function refreshWho() {
   const u = S.user, w = $('#whoBox');
   if (!u) { w.innerHTML = `<button class="btn sm" id="hdrEntrar">Entrar</button>`; $('#hdrEntrar').onclick = () => setEnv('col'); return; }
-  w.innerHTML = `${avatarHTML(u, 34)}<div class="who-t"><b>${esc(u.name)}</b><span>${isSup(u) ? '🛡️ Supervisão' : esc(u.role || 'Colaborador')}</span></div><button class="btn sm" id="btnLogout">Sair</button>`;
+  w.innerHTML = `${avatarHTML(u, 34)}<div class="who-t"><b>${esc(u.name)}</b><span>${isSup(u) ? 'Supervisão' : esc(u.role || 'Colaborador')}</span></div><button class="btn sm" id="btnLogout">Sair</button>`;
   $('#btnLogout').onclick = logout;
 }
 

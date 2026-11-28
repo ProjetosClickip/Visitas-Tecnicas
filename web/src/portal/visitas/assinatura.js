@@ -15,13 +15,13 @@ function renderAssinatura() {
   el.innerHTML = `<div class="grid g2">
     <div><div style="font-size:13px;font-weight:600;color:var(--navy-2);margin-bottom:6px">Assinatura registrada na conta de ${esc(u.name)}</div>
       <div style="border:1px dashed var(--line);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;background:#fff">${sg && sg.img ? `<img src="${esc(sg.img)}" style="max-height:95px;max-width:90%">` : '<span class="muted small">Nenhuma assinatura registrada</span>'}</div>
-      <div class="row" style="margin-top:8px"><button class="btn sm" id="sgEdit">${sg && sg.img ? 'Alterar assinatura' : '✍️ Cadastrar assinatura'}</button>${sg && sg.cpf ? `<span class="small muted">CPF ${esc(cpfMask(sg.cpf))}</span>` : ''}</div></div>
+      <div class="row" style="margin-top:8px"><button class="btn sm" id="sgEdit">${sg && sg.img ? 'Alterar assinatura' : 'Cadastrar assinatura'}</button>${sg && sg.cpf ? `<span class="small muted">CPF ${esc(cpfMask(sg.cpf))}</span>` : ''}</div></div>
     <div><div style="font-size:13px;font-weight:600;color:var(--navy-2);margin-bottom:6px">Assinatura deste relatório</div>
       ${a ? (valida
         ? `<div class="note" style="margin-top:0">✓ Assinado eletronicamente por <b>${esc(a.nome)}</b> em ${dtHrBR(a.em)}.<br>Código de verificação: <b>${esc(a.codigo)}</b></div>`
-        : `<div class="note warn" style="margin-top:0">⚠ A visita foi alterada depois da assinatura de ${esc(a.nome)} (${dtHrBR(a.em)}). A assinatura não será impressa no PDF – assine novamente.</div>`)
+        : `<div class="note warn" style="margin-top:0"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg> A visita foi alterada depois da assinatura de ${esc(a.nome)} (${dtHrBR(a.em)}). A assinatura não será impressa no PDF – assine novamente.</div>`)
         : `<div class="note" style="margin-top:0">Relatório ainda não assinado. Ao assinar, a imagem da sua assinatura, a data/hora e um código de verificação serão impressos na última folha do PDF.</div>`}
-      <div class="row" style="margin-top:8px"><button class="btn primary sm" id="sgSign" ${sg && sg.img ? '' : 'disabled'}>${a ? 'Assinar novamente' : '✍️ Assinar relatório'}</button>${a ? '<button class="btn sm danger" id="sgDel">Remover assinatura</button>' : ''}</div>
+      <div class="row" style="margin-top:8px"><button class="btn primary sm" id="sgSign" ${sg && sg.img ? '' : 'disabled'}>${a ? 'Assinar novamente' : 'Assinar relatório'}</button>${a ? '<button class="btn sm danger" id="sgDel">Remover assinatura</button>' : ''}</div>
       <p class="small muted" style="margin:8px 0 0">Assinatura eletrônica interna, confirmada com a senha da conta e registrada pelo servidor. Para assinatura com validade jurídica, assine o PDF exportado no assinador do gov.br.</p></div>
   </div>`;
   $('#sgEdit').onclick = e => { e.stopPropagation(); editarAssinatura(() => renderAssinatura()); };
@@ -56,7 +56,7 @@ function editarAssinatura(done) {
     <div class="login-tabs"><button data-sm="draw" class="on">Desenhar</button><button data-sm="up">Enviar imagem</button></div>
     <div id="sgDraw"><canvas id="sgCv" width="900" height="300" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;touch-action:none;cursor:crosshair"></canvas>
       <div class="row" style="justify-content:space-between"><span class="small muted">Assine com o mouse, caneta ou dedo.</span><button class="btn sm" id="sgClr">Limpar</button></div></div>
-    <div id="sgUp" class="hidden"><label class="drop">📎 Selecione uma foto/scan da assinatura (PNG/JPEG) – o fundo branco é removido automaticamente<input type="file" id="sgFile" accept="image/png,image/jpeg" hidden></label>
+    <div id="sgUp" class="hidden"><label class="drop"><svg class="ic" aria-hidden="true"><use href="#i-paperclip"/></svg> Selecione uma foto/scan da assinatura (PNG/JPEG) – o fundo branco é removido automaticamente<input type="file" id="sgFile" accept="image/png,image/jpeg" hidden></label>
       <div id="sgPrev" style="height:110px;display:flex;align-items:center;justify-content:center;margin-top:8px"></div></div>
     <label class="f" style="margin-top:10px">CPF (opcional – exibido mascarado no selo, como no gov.br)<input type="text" id="sgCpf" inputmode="numeric" value="${esc((u.assinatura && u.assinatura.cpf) || '')}" placeholder="000.000.000-00"></label>
     <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="sgSave">Salvar na minha conta</button></div>`, (m, close) => {

@@ -49,7 +49,7 @@ const CX_LISTAS = {
   fibraDiag: { btn: 'Anexar diagrama da fibra escolhida para o atendimento', titulo: 'Diagrama da fibra de atendimento', nome: 'Cabo / fibra escolhida', ph: '12FO - F9 > 06FO - F1', cor: 'var(--teal)' }
 };
 function cxBlock(key) {
-  return `<div style="margin-top:12px"><label class="btn navy">📎 ${CX_LISTAS[key].btn}<input type="file" data-cxin="${key}" accept="image/png,image/jpeg" multiple hidden></label><div data-cxlist="${key}" style="margin-top:10px"></div></div>`;
+  return `<div style="margin-top:12px"><label class="btn navy"><svg class="ic" aria-hidden="true"><use href="#i-paperclip"/></svg> ${CX_LISTAS[key].btn}<input type="file" data-cxin="${key}" accept="image/png,image/jpeg" multiple hidden></label><div data-cxlist="${key}" style="margin-top:10px"></div></div>`;
 }
 function bindCx() {
   $$('[data-cxin]').forEach(i => i.onchange = async () => {

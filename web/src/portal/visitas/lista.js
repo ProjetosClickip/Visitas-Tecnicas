@@ -121,7 +121,7 @@ function renderList(type) {
       ${type ? `<button class="btn primary" id="btnNew">+ Nova visita ${TYPES[type].nome.toLowerCase()}</button>` :
       `<button class="btn primary" data-new="cond">+ Condomínio</button><button class="btn teal" data-new="corp">+ Link Dedicado</button><button class="btn navy" data-new="evt">+ Evento</button>`}
     </div>
-    ${!type ? `<div class="pf-hero" style="${S.user.banner ? `background-image:url(${S.user.banner})` : ''}"><div class="pf-hero-in">${avatarHTML(S.user, 64)}<div><h3>Olá, ${esc(S.user.name.split(' ')[0])}!</h3><span>${esc(S.user.role || 'Colaborador')}${isSup(S.user) ? ' · 🛡️ Supervisão' : ''}</span></div></div></div>` : ''}
+    ${!type ? `<div class="pf-hero" style="${S.user.banner ? `background-image:url(${S.user.banner})` : ''}"><div class="pf-hero-in">${avatarHTML(S.user, 64)}<div><h3>Olá, ${esc(S.user.name.split(' ')[0])}!</h3><span>${esc(S.user.role || 'Colaborador')}${isSup(S.user) ? ' · Supervisão' : ''}</span></div></div></div>` : ''}
     ${!type ? `<div class="stats">
       <div class="kpi"><div class="v">${S.visits.length}</div><div class="l">Visitas registradas</div></div>
       <div class="kpi"><div class="v">${cnt('cond')}</div><div class="l">Condomínios</div></div>
@@ -139,10 +139,10 @@ function renderList(type) {
     </div>
     ${list.length ? `<div class="hist-grid">${list.map(v => `
       <div class="hcard ${v.type}">
-        <div class="row"><span class="pill ${TYPES[v.type].pill}">${TYPES[v.type].nome}</span>${stPill(v.status)}</div>${v.devolucao && v.status === 'draft' ? `<div class="note warn" style="margin:0;padding:6px 8px">↩ Devolvido por ${esc(v.devolucao.por)}: ${esc(v.devolucao.motivo)}</div>` : ''}${v.aprovacao && v.status === 'done' ? `<div class="small" style="color:var(--ok)">✔ Aprovado por ${esc(v.aprovacao.por)} em ${dtBR(v.aprovacao.em.slice(0, 10))}</div>` : ''}
+        <div class="row"><span class="pill ${TYPES[v.type].pill}">${TYPES[v.type].nome}</span>${stPill(v.status)}</div>${v.devolucao && v.status === 'draft' ? `<div class="note warn" style="margin:0;padding:6px 8px"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg> Devolvido por ${esc(v.devolucao.por)}: ${esc(v.devolucao.motivo)}</div>` : ''}${v.aprovacao && v.status === 'done' ? `<div class="small" style="color:var(--ok)"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Aprovado por ${esc(v.aprovacao.por)} em ${dtBR(v.aprovacao.em.slice(0, 10))}</div>` : ''}
         <h4>${esc(visitTitle(v))}</h4>
-        <div class="meta">📍 ${esc(v.loc.endereco || 'Endereço não informado')}${v.loc.cidade ? ' – ' + esc(v.loc.cidade) : ''}</div>
-        <div class="meta">📅 Visita ${dtBR(v.cli.data)} · atualizado ${dtHrBR(v.updatedAt)}</div>
+        <div class="meta"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> ${esc(v.loc.endereco || 'Endereço não informado')}${v.loc.cidade ? ' – ' + esc(v.loc.cidade) : ''}</div>
+        <div class="meta"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg> Visita ${dtBR(v.cli.data)} · atualizado ${dtHrBR(v.updatedAt)}</div>
         <div class="meta">${summaryLine(v)}</div>
         <div class="acts"><button class="btn sm navy" data-open="${v.id}">Abrir</button><button class="btn sm" data-pdf="${v.id}">PDF</button><button class="btn sm" data-kmz="${v.id}">KMZ</button><button class="btn sm" data-dup="${v.id}">Duplicar</button><button class="btn sm danger" data-del="${v.id}">Excluir</button></div>
       </div>`).join('')}</div>`

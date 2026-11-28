@@ -10,8 +10,8 @@ import { $, esc, toast } from './util.js';
 
 
 const INTRO = {
-  sup: `<span class="kicker">AMBIENTE DA SUPERVISÃO</span><h2>Central de gestão e aprovação</h2><p>Acesso exclusivo para a supervisão do Grupo Click IP.</p><ul class="feat"><li>✔ Aprovação dos relatórios e dos orçamentos de custos</li><li>📊 Visão detalhada de todas as visitas e números</li><li>👥 Acompanhamento e gestão da equipe</li><li>🔓 Acesso completo aos dados dos clientes</li></ul>`,
-  col: `<span class="kicker">AMBIENTE DO COLABORADOR</span><h2>Plataforma de Projetos Click IP</h2><p>Um único acesso para todos os sistemas do time de projetos.</p><ul class="feat"><li>📋 Visitas Técnicas – levantamento, croqui e projeto executivo</li><li>💰 Mensuração de Custos – orçamentos de materiais e serviços</li><li>🛰️ ClickIP FiberControl – em integração</li><li>📊 Início com seus resumos e demandas</li></ul>`
+  sup: `<span class="kicker">AMBIENTE DA SUPERVISÃO</span><h2>Central de gestão e aprovação</h2><p>Acesso exclusivo para a supervisão do Grupo Click IP.</p><ul class="feat"><li>Aprovação dos relatórios e dos orçamentos de custos</li><li>Visão detalhada de todas as visitas e números</li><li>Acompanhamento e gestão da equipe</li><li>Acesso completo aos dados dos clientes</li></ul>`,
+  col: `<span class="kicker">AMBIENTE DO COLABORADOR</span><h2>Plataforma de Projetos Click IP</h2><p>Um único acesso para todos os sistemas do time de projetos.</p><ul class="feat"><li>Visitas Técnicas – levantamento, croqui e projeto executivo</li><li>Mensuração de Custos – orçamentos de materiais e serviços</li><li>ClickIP FiberControl – em integração</li><li>Início com seus resumos e demandas</li></ul>`
 };
 let loginEmail = '';
 
@@ -52,7 +52,7 @@ function renderLogin(el, ctx) {
 function renderTrocarSenha(el) {
   el = el || (ENV === 'sup' ? $('#supMain') : $('#colLogin'));
   if (ENV === 'col') { $('#app').classList.add('hidden'); el.classList.remove('hidden'); }
-  el.innerHTML = `<div class="split-card"><div class="split-l"><span class="kicker">PRIMEIRO ACESSO</span><h2>Defina a sua senha</h2><p>Olá, ${esc(S.user ? S.user.name : '')}! Você entrou com uma senha provisória. Crie agora uma senha pessoal para continuar.</p><ul class="feat"><li>🔒 Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial</li><li>🙈 Não use o seu nome ou e-mail</li><li>👤 A senha é pessoal: não compartilhe</li></ul></div><div class="split-r">
+  el.innerHTML = `<div class="split-card"><div class="split-l"><span class="kicker">PRIMEIRO ACESSO</span><h2>Defina a sua senha</h2><p>Olá, ${esc(S.user ? S.user.name : '')}! Você entrou com uma senha provisória. Crie agora uma senha pessoal para continuar.</p><ul class="feat"><li>Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial</li><li>Não use o seu nome ou e-mail</li><li>A senha é pessoal: não compartilhe</li></ul></div><div class="split-r">
     <form id="tsForm">
       <label class="f">Senha provisória (atual)<input type="password" id="tsAtual" autocomplete="current-password" required></label>
       <label class="f" style="margin-top:8px">Nova senha<input type="password" id="tsNova" autocomplete="new-password" required></label>
